@@ -1,0 +1,6 @@
+<div class="article-meta">
+  <a href="/{{ tags | getBeat }}/" class="beat-label beat-{{ tags | getBeat }}">{{ tags | getBeat | capitalize }}</a>
+  <time datetime="{{ date | dateISO }}">{{ date | dateFormat }}</time>
+  <span class="byline">{{ site.author }}</span>
+  <span class="reading-time">{{ content | readingTime }}</span>
+</div>

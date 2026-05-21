@@ -1,0 +1,20 @@
+---
+layout: layouts/base.njk
+---
+
+{% block head %}
+{% include "components/breadcrumbs.njk" %}
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <article class="static-page">
+    <h1>{{ title }}</h1>
+    {{ content | safe }}
+  </article>
+
+  <aside class="page-sidebar">
+    {% include "components/newsletter-signup.njk" %}
+  </aside>
+</div>
+{% endblock %}

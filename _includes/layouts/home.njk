@@ -1,0 +1,55 @@
+---
+layout: layouts/base.njk
+---
+
+{% block content %}
+{% include "components/ad-header.njk" %}
+
+<section class="home-featured">
+  {% set latest = collections.briefings | first %}
+  {% if latest %}
+  <article class="featured-briefing">
+    <span class="beat-label beat-{{ latest.data.tags | getBeat }}">{{ latest.data.tags | getBeat | capitalize }}</span>
+    <h1><a href="{{ latest.url }}">{{ latest.data.title }}</a></h1>
+    <div class="featured-meta">
+      <time datetime="{{ latest.date | dateISO }}">{{ latest.date | dateFormat }}</time>
+      <span class="reading-time">{{ latest.templateContent | readingTime }}</span>
+    </div>
+    <p class="featured-summary">{{ latest.data.summary }}</p>
+    <a href="{{ latest.url }}" class="read-more">Read the full briefing</a>
+  </article>
+  {% endif %}
+</section>
+
+<section class="home-recent">
+  <h2>Recent Briefings</h2>
+  <div class="briefing-list">
+    {% for post in collections.briefings | slice(1, 8) %}
+    {% if loop.index0 == 3 %}
+    {% include "components/ad-in-feed.njk" %}
+    {% endif %}
+    <article class="briefing-card">
+      <span class="beat-label beat-{{ post.data.tags | getBeat }}">{{ post.data.tags | getBeat | capitalize }}</span>
+      <h3><a href="{{ post.url }}">{{ post.data.title }}</a></h3>
+      <time datetime="{{ post.date | dateISO }}">{{ post.date | dateFormat }}</time>
+      <p>{{ post.data.summary | truncate(160) }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<aside class="home-sidebar">
+  {% include "components/newsletter-signup.njk" %}
+
+  <nav class="beat-nav">
+    <h3>Browse by Beat</h3>
+    <ul>
+      {% for beat in site.beats %}
+      <li><a href="/{{ beat.slug }}/">{{ beat.name }}</a> — {{ beat.description }}</li>
+      {% endfor %}
+    </ul>
+  </nav>
+</aside>
+
+{% include "components/ad-footer.njk" %}
+{% endblock %}

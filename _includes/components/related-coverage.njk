@@ -1,0 +1,19 @@
+{% if related_briefings and related_briefings.length > 0 %}
+<section class="related-coverage">
+  <h3>Related Coverage</h3>
+  <ul class="related-list">
+    {% for slug in related_briefings %}
+    {% set relatedPost = collections.briefings | selectattr("data.slug", "equalto", slug) | first %}
+    {% if relatedPost %}
+    <li class="related-item">
+      <a href="{{ relatedPost.url }}">{{ relatedPost.data.title }}</a>
+      <span class="related-meta">
+        <time datetime="{{ relatedPost.date | dateISO }}">{{ relatedPost.date | dateFormat }}</time>
+        <span class="beat-label beat-{{ relatedPost.data.tags | getBeat }}">{{ relatedPost.data.tags | getBeat | capitalize }}</span>
+      </span>
+    </li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}

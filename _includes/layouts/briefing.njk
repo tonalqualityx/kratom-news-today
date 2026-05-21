@@ -1,0 +1,81 @@
+---
+layout: layouts/base.njk
+---
+
+{% block head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": "{{ title }}",
+  "description": "{{ summary }}",
+  "image": "{{ site.url }}/assets/og-images/{{ slug }}.png",
+  "datePublished": "{{ date | dateISO }}",
+  "dateModified": "{{ date_modified | dateISO if date_modified else date | dateISO }}",
+  "author": {
+    "@type": "Organization",
+    "name": "{{ site.author }}",
+    "url": "{{ site.url }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ site.title }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ site.url }}/assets/logo.svg"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ site.url }}{{ page.url }}"
+  },
+  "articleSection": "{{ tags | getBeat | capitalize }}",
+  "keywords": "{{ tags | join(', ') }}"{% if sources %},
+  "citation": [
+    {% for source in sources %}
+    {
+      "@type": "CreativeWork",
+      "name": "{{ source.title }}",
+      "url": "{{ source.url }}",
+      "publisher": "{{ source.publisher }}"{% if source.published %},
+      "datePublished": "{{ source.published }}"{% endif %}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]{% endif %}
+}
+</script>
+
+{% include "components/breadcrumbs.njk" %}
+{% endblock %}
+
+{% block content %}
+<article class="briefing">
+  <header class="briefing-header">
+    <h1 class="briefing-title">{{ title }}</h1>
+    {% include "components/article-meta.njk" %}
+  </header>
+
+  {% include "components/tldr.njk" %}
+
+  <div class="briefing-body">
+    {{ content | safe }}
+  </div>
+
+  {% include "components/share-buttons.njk" %}
+
+  {% include "components/ad-end-of-article.njk" %}
+
+  {% include "components/sources.njk" %}
+
+  {% include "components/related-coverage.njk" %}
+</article>
+
+<aside class="briefing-sidebar">
+  {% include "components/newsletter-signup.njk" %}
+  {% include "components/ad-sidebar.njk" %}
+</aside>
+{% endblock %}
+
+{% block scripts %}
+<script src="/assets/js/share.js" defer></script>
+{% endblock %}

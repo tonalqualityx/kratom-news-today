@@ -1,0 +1,24 @@
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="site-wordmark">
+      <img src="/assets/logo.svg" alt="{{ site.title }}" class="site-logo">
+    </a>
+
+    <nav class="site-nav" aria-label="Main navigation">
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation">
+        <span class="nav-toggle-icon"></span>
+      </button>
+      <ul id="nav-menu" class="nav-menu">
+        <li><a href="/"{% if page.url == "/" %} aria-current="page"{% endif %}>Home</a></li>
+        <li><a href="/regulation/"{% if page.url == "/regulation/" %} aria-current="page"{% endif %}>Regulation</a></li>
+        <li><a href="/business/"{% if page.url == "/business/" %} aria-current="page"{% endif %}>Business</a></li>
+        <li><a href="/science/"{% if page.url == "/science/" %} aria-current="page"{% endif %}>Science</a></li>
+        <li><a href="/about/"{% if page.url == "/about/" %} aria-current="page"{% endif %}>About</a></li>
+      </ul>
+    </nav>
+
+    <a href="/search/" class="search-link" aria-label="Search">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </a>
+  </div>
+</header>

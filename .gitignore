@@ -1,0 +1,12 @@
+node_modules/
+_site/
+.herald/
+drafts/*
+!drafts/failed/
+!drafts/failed/.gitkeep
+src/assets/og-images/*
+!src/assets/og-images/.gitkeep
+.env
+*.log
+.DS_Store
+knt-herald.zip

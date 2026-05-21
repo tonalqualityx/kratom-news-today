@@ -1,0 +1,25 @@
+---json
+{
+  "permalink": "/science/feed.xml",
+  "eleventyExcludeFromCollections": true
+}
+---
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>{{ site.title }} — Science</title>
+    <link>{{ site.url }}/science/</link>
+    <description>Science beat: peer-reviewed research, NIH-funded studies, university programs.</description>
+    <language>en</language>
+    <atom:link href="{{ site.url }}/science/feed.xml" rel="self" type="application/rss+xml"/>
+    {% for post in collections.science | head(50) %}
+    <item>
+      <title>{{ post.data.title }}</title>
+      <link>{{ site.url }}{{ post.url }}</link>
+      <guid isPermaLink="true">{{ site.url }}{{ post.url }}</guid>
+      <pubDate>{{ post.date | dateRfc822 }}</pubDate>
+      <description><![CDATA[{{ post.templateContent | safe }}]]></description>
+    </item>
+    {% endfor %}
+  </channel>
+</rss>

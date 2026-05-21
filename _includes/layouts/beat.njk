@@ -1,0 +1,36 @@
+---
+layout: layouts/base.njk
+---
+
+{% block content %}
+<header class="beat-header">
+  <h1>{{ beatName }}</h1>
+  <p class="beat-description">{{ beatDescription }}</p>
+  <a href="/{{ beatSlug }}/feed.xml" class="rss-link">RSS Feed</a>
+</header>
+
+<div class="beat-content">
+  <div class="briefing-list">
+    {% set beatPosts = collections[beatSlug] %}
+    {% for post in beatPosts %}
+    {% if loop.index0 == 4 %}
+    {% include "components/ad-in-feed.njk" %}
+    {% endif %}
+    <article class="briefing-card">
+      <h3><a href="{{ post.url }}">{{ post.data.title }}</a></h3>
+      <time datetime="{{ post.date | dateISO }}">{{ post.date | dateFormat }}</time>
+      <p>{{ post.data.summary | truncate(160) }}</p>
+    </article>
+    {% endfor %}
+
+    {% if not beatPosts or beatPosts.length == 0 %}
+    <p class="empty-state">No briefings in this beat yet. Check back soon.</p>
+    {% endif %}
+  </div>
+
+  <aside class="beat-sidebar">
+    {% include "components/newsletter-signup.njk" %}
+    {% include "components/ad-sidebar.njk" %}
+  </aside>
+</div>
+{% endblock %}

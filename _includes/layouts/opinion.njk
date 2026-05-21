@@ -1,0 +1,20 @@
+---
+layout: layouts/base.njk
+---
+
+{% block content %}
+<article class="opinion">
+  <header class="opinion-header">
+    <span class="content-type-label">Opinion</span>
+    <h1>{{ title }}</h1>
+    <div class="opinion-meta">
+      <span class="byline">By {{ author or site.author }}</span>
+      <time datetime="{{ date | dateISO }}">{{ date | dateFormat }}</time>
+    </div>
+  </header>
+
+  <div class="opinion-body">
+    {{ content | safe }}
+  </div>
+</article>
+{% endblock %}

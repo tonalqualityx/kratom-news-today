@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{% if title %}{{ title }} — {{ site.title }}{% else %}{{ site.title }} — {{ site.tagline }}{% endif %}</title>
+  <meta name="description" content="{{ description or summary or site.tagline }}">
+  <link rel="canonical" href="{{ site.url }}{{ page.url }}">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="{% if type == 'briefing' %}article{% else %}website{% endif %}">
+  <meta property="og:title" content="{{ title or site.title }}">
+  <meta property="og:description" content="{{ summary or description or site.tagline }}">
+  <meta property="og:url" content="{{ site.url }}{{ page.url }}">
+  <meta property="og:image" content="{% if slug %}{{ site.url }}/assets/og-images/{{ slug }}.png{% else %}{{ site.url }}/assets/default-og.png{% endif %}">
+  <meta property="og:site_name" content="{{ site.title }}">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ title or site.title }}">
+  <meta name="twitter:description" content="{{ summary or description or site.tagline }}">
+  <meta name="twitter:image" content="{% if slug %}{{ site.url }}/assets/og-images/{{ slug }}.png{% else %}{{ site.url }}/assets/default-og.png{% endif %}">
+
+  {% if type == 'briefing' %}
+  <meta property="article:published_time" content="{{ date | dateISO }}">
+  <meta property="article:modified_time" content="{{ date_modified | dateISO if date_modified else date | dateISO }}">
+  <meta property="article:section" content="{{ tags | getBeat | capitalize }}">
+  {% for tag in tags %}
+  <meta property="article:tag" content="{{ tag }}">
+  {% endfor %}
+  {% endif %}
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ site.url }}/feed.xml">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/assets/favicon.ico">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/assets/styles.css">
+
+  {% include "partials/schema-organization.njk" %}
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% include "partials/header.njk" %}
+
+  <main id="main-content">
+    {% block content %}
+      {{ content | safe }}
+    {% endblock %}
+  </main>
+
+  {% include "partials/footer.njk" %}
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,17 @@
+---
+layout: layouts/base.njk
+---
+
+{% block content %}
+<div class="search-page">
+  <h1>Search</h1>
+  {% include "components/search-form.njk" %}
+  <div id="search-results" class="search-results">
+    <p class="search-placeholder">Enter a search term to find briefings.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/assets/js/search.js" defer></script>
+{% endblock %}

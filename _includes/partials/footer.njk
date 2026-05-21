@@ -1,0 +1,26 @@
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="/" class="footer-wordmark">{{ site.title }}</a>
+      <p class="footer-tagline">{{ site.tagline }}</p>
+    </div>
+
+    <nav class="footer-nav" aria-label="Footer navigation">
+      <ul>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/contact/">Contact</a></li>
+        <li><a href="/editorial-policy/">Editorial Policy</a></li>
+        <li><a href="/corrections/">Corrections</a></li>
+        <li><a href="/feed.xml">RSS</a></li>
+      </ul>
+    </nav>
+
+    <div class="footer-disclosure">
+      <p>Published by <a href="https://herbapumps.com" rel="noopener" target="_blank">Herba Releaf</a> &middot; Operator of herbapumps.com</p>
+    </div>
+
+    <div class="footer-copyright">
+      <p>&copy; {{ "now" | dateFormat | slice(-4) }} {{ site.title }}. All rights reserved.</p>
+    </div>
+  </div>
+</footer>

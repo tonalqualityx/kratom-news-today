@@ -1,0 +1,27 @@
+{
+  "title": "Kratom News Today",
+  "tagline": "The daily briefing on kratom — regulation, science, business, and what you need to know.",
+  "url": "https://kratomnewstoday.com",
+  "author": "Kratom News Today Staff",
+  "managingEditor": "Mike Dion",
+  "publisher": {
+    "name": "Herba Releaf",
+    "url": "https://herbapumps.com",
+    "address": {
+      "street": "281 West 6th Street",
+      "city": "Wyoming",
+      "state": "PA",
+      "zip": "18644"
+    }
+  },
+  "beats": [
+    {"slug": "regulation", "name": "Regulation", "description": "Federal action, state legislation, court decisions, enforcement."},
+    {"slug": "business", "name": "Business", "description": "Companies, markets, retail and wholesale trends, financial news."},
+    {"slug": "science", "name": "Science", "description": "Peer-reviewed research, NIH-funded studies, university programs, harm reduction research."}
+  ],
+  "email": {
+    "editor": "editor@kratomnewstoday.com",
+    "advertising": "advertising@kratomnewstoday.com",
+    "newsletter": "briefing@kratomnewstoday.com"
+  }
+}

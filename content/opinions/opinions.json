@@ -1,0 +1,5 @@
+{
+  "layout": "opinion",
+  "permalink": "/opinions/{{ slug }}/index.html",
+  "tags": []
+}

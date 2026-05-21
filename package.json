@@ -1,0 +1,22 @@
+{
+  "name": "kratom-news-today",
+  "version": "1.0.0",
+  "description": "Kratom News Today - Daily briefing on the kratom industry",
+  "scripts": {
+    "build": "npx @11ty/eleventy",
+    "serve": "npx @11ty/eleventy --serve",
+    "validate": "node scripts/validate.js",
+    "build-search": "node scripts/build-search-index.js"
+  },
+  "dependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "@11ty/eleventy-plugin-rss": "^2.0.2",
+    "markdown-it": "^14.1.0",
+    "markdown-it-attrs": "^4.2.0",
+    "gray-matter": "^4.0.3",
+    "sharp": "^0.33.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

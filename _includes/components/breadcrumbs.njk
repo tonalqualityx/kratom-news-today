@@ -7,9 +7,9 @@
       {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site.url }}/"},
       {% if tags | getBeat %}
       {"@type": "ListItem", "position": 2, "name": "{{ tags | getBeat | capitalize }}", "item": "{{ site.url }}/{{ tags | getBeat }}/"},
-      {"@type": "ListItem", "position": 3, "name": "{{ title }}"}
+      {"@type": "ListItem", "position": 3, "name": "{{ title }}", "item": "{{ site.url }}{{ page.url }}"}
       {% else %}
-      {"@type": "ListItem", "position": 2, "name": "{{ title }}"}
+      {"@type": "ListItem", "position": 2, "name": "{{ title }}", "item": "{{ site.url }}{{ page.url }}"}
       {% endif %}
     ]
   }

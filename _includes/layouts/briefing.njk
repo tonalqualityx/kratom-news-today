@@ -13,12 +13,19 @@ layout: layouts/base.njk
   "datePublished": "{{ date | dateISO }}",
   "dateModified": "{{ date_modified | dateISO if date_modified else date | dateISO }}",
   "author": {
-    "@type": "Organization",
-    "name": "{{ site.author }}",
-    "url": "{{ site.url }}"
+    "@type": "Person",
+    "name": "Mike Dion",
+    "jobTitle": "Managing Editor",
+    "url": "{{ site.url }}/about/"
+  },
+  "editor": {
+    "@type": "Person",
+    "name": "Mike Dion",
+    "jobTitle": "Managing Editor",
+    "url": "{{ site.url }}/about/"
   },
   "publisher": {
-    "@type": "Organization",
+    "@type": "NewsMediaOrganization",
     "name": "{{ site.title }}",
     "logo": {
       "@type": "ImageObject",

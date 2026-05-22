@@ -1,15 +1,26 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": "NewsMediaOrganization",
   "name": "{{ site.title }}",
   "url": "{{ site.url }}",
   "logo": "{{ site.url }}/assets/logo.svg",
-  "publishingPrinciples": "{{ site.url }}/about",
+  "publishingPrinciples": "{{ site.url }}/editorial-policy/",
+  "diversityPolicy": "{{ site.url }}/editorial-policy/",
+  "ethicsPolicy": "{{ site.url }}/editorial-policy/",
+  "correctionsPolicy": "{{ site.url }}/corrections/",
   "parentOrganization": {
     "@type": "Organization",
     "name": "{{ site.publisher.name }}",
-    "url": "{{ site.publisher.url }}"
+    "url": "{{ site.publisher.url }}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ site.publisher.address.street }}",
+      "addressLocality": "{{ site.publisher.address.city }}",
+      "addressRegion": "{{ site.publisher.address.state }}",
+      "postalCode": "{{ site.publisher.address.zip }}",
+      "addressCountry": "US"
+    }
   }
 }
 </script>

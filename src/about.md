@@ -25,9 +25,11 @@ Our primary audience includes industry operators, retailers, advocates, research
 
 ## How our coverage works
 
-Daily briefings are produced using an AI-assisted editorial workflow. Our research system surveys industry news sources, regulatory filings, court documents, peer-reviewed publications, and trade press daily. A synthesis process produces draft briefings following our editorial rules and voice guidelines. Every briefing is attributed to primary sources and linked to original reporting.
+Daily briefings are produced through an AI-assisted editorial workflow with multiple automated review stages and human editorial oversight. The research stage uses LLM-powered tooling to survey industry news sources, regulatory filings, court documents, peer-reviewed publications, and trade press daily. The synthesis stage produces draft briefings that pass through voice, rules, and compliance check stages before publication. The voice and rules checks enforce attribution standards and the editorial constraints documented in our [editorial policy](/editorial-policy/). The compliance check screens drafts for medical claims and legal advice, which the publication does not make in its own voice.
 
-We believe in transparency about this process. AI-assisted production allows a small editorial team to maintain daily coverage across three beats with consistent sourcing standards. The editorial rules, voice guidelines, and compliance checks that govern every briefing are designed to produce journalism that meets traditional editorial standards.
+The Managing Editor configures the publication's voice, editorial rules, and compliance constraints, reviews the workflow's process and output, and adjusts the configuration as the publication evolves. Daily briefings are reviewed for editorial standards by the automated review stages and reviewed for process and output by the Managing Editor on an ongoing basis.
+
+We disclose this approach because we think readers should know how the publication operates. AI-assisted production does not relax our standards for attribution, accuracy, or editorial discipline. It changes how we produce coverage, not what we hold ourselves to.
 
 ## Publisher and ownership
 
@@ -39,9 +41,11 @@ Advertising on this site is clearly labeled and structurally separated from edit
 
 ## Editorial team
 
-**Mike Dion** serves as Managing Editor. He configures the publication's voice and editorial rules, oversees the editorial process, and maintains the standards that govern daily coverage.
+**Mike Dion** is a digital strategist who has spent more than a decade working with small businesses and operators across the botanical products industry and other regulated categories. He is the founder of [Indelible](https://becomeindelible.com), a digital strategy and web agency based in Springfield, Vermont, and writes about technology, work, and strategy at [whoismikedion.com](https://whoismikedion.com). As Managing Editor of Kratom News Today, he configures the publication's voice and editorial rules, oversees the workflow that produces daily coverage, and is responsible for the publication's editorial standards. He can be reached at editor@kratomnewstoday.com.
 
-**Cory Kilheeney** and **Austin Kilheeney** are the founders of Herba Releaf, the publication's parent company.
+**Cory Kilheeney** is the co-founder of Herba Releaf and the company's primary product and lab operations lead. Before founding Herba Releaf, Cory worked in finance management at a national automotive brand before transitioning into the botanical products industry in 2016. He developed Herba Releaf's full-extraction methodology, a process that avoids the harsh chemical solvents typical in concentrated extract production. Cory's background in the kava and botanical space began with the founding of Kava Korner in eastern Pennsylvania, which remains a part of the broader operation.
+
+**Austin Kilheeney** is the co-founder of Herba Releaf and handles the company's operations and back-end administration. Austin holds a master's degree in Rhetoric and Grammar from Duquesne University, where he also served as a research assistant for multiple faculty members. Before joining Herba Releaf full-time, Austin worked as a Marketing Coordinator at a Pittsburgh-based nonprofit. He moved across Pennsylvania to co-found Herba Releaf with his brother during the pandemic.
 
 ## Contact
 

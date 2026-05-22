@@ -864,6 +864,7 @@ hr {
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: var(--space-6);
+  overflow: hidden;
 }
 
 .newsletter-signup h3 {
@@ -881,11 +882,13 @@ hr {
 
 .newsletter-form {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
 .newsletter-form input[type="email"] {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: 4px;

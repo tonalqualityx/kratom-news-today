@@ -39,3 +39,14 @@ jobs:
         run: |
           ssh-keyscan -H ${{ secrets.CLOUDWAYS_SSH_HOST }} >> ~/.ssh/known_hosts
           rsync -avz --delete _site/ ${{ secrets.CLOUDWAYS_SSH_USER }}@${{ secrets.CLOUDWAYS_SSH_HOST }}:${{ secrets.CLOUDWAYS_DEPLOY_PATH }}/
+
+      - name: Purge Cloudways Varnish cache
+        run: |
+          ssh ${{ secrets.CLOUDWAYS_SSH_USER }}@${{ secrets.CLOUDWAYS_SSH_HOST }} "cd ${{ secrets.CLOUDWAYS_DEPLOY_PATH }} && wget -qO- http://localhost:8888/purge/.*" || echo "Varnish purge attempted"
+
+      - name: Purge Cloudflare cache
+        run: |
+          curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}'

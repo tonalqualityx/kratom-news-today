@@ -592,6 +592,22 @@ hr {
   margin-right: var(--space-4);
 }
 
+.article-meta-editor {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.article-meta-editor a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.article-meta-editor a:hover {
+  color: var(--color-accent);
+}
+
 /* ------------------------------------------------------------
    9. Beat Page
    ------------------------------------------------------------ */
@@ -827,7 +843,7 @@ hr {
 .share-buttons {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
   padding: var(--space-6) 0;
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
@@ -842,22 +858,42 @@ hr {
   letter-spacing: 0.05em;
 }
 
-.share-buttons a,
-.share-buttons button {
-  font-size: var(--text-sm);
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   color: var(--color-text-secondary);
-  text-decoration: none;
-  padding: var(--space-2) var(--space-3);
+  background: none;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  background: none;
   cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
 }
 
-.share-buttons a:hover,
-.share-buttons button:hover {
+.share-btn:hover {
   color: var(--color-accent);
   border-color: var(--color-accent);
+}
+
+.share-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.copy-feedback {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* Newsletter Signup */

@@ -45,7 +45,14 @@ jobs:
 
       - name: Purge Cloudways Varnish cache
         run: |
-          ssh ${{ secrets.CLOUDWAYS_SSH_USER }}@${{ secrets.CLOUDWAYS_SSH_HOST }} "cd ${{ secrets.CLOUDWAYS_DEPLOY_PATH }} && wget -qO- http://localhost:8888/purge/.*" || echo "Varnish purge attempted"
+          TOKEN=$(curl -s -X POST "https://api.cloudways.com/api/v1/oauth/access_token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "email=${{ secrets.CLOUDWAYS_API_EMAIL }}&api_key=${{ secrets.CLOUDWAYS_API_KEY }}" \
+            | jq -r '.access_token')
+          curl -s -X POST "https://api.cloudways.com/api/v1/service/varnish" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "server_id=${{ secrets.CLOUDWAYS_SERVER_ID }}&action=purge"
 
       - name: Purge Cloudflare cache
         run: |

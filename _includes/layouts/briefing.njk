@@ -49,31 +49,33 @@ layout: layouts/base.njk
 {% endblock %}
 
 {% block content %}
-<article class="briefing">
-  <header class="briefing-header">
-    <h1 class="briefing-title">{{ title }}</h1>
-    {% include "components/article-meta.njk" %}
-  </header>
+<div class="briefing-layout">
+  <article class="briefing">
+    <header class="briefing-header">
+      <h1 class="briefing-title">{{ title }}</h1>
+      {% include "components/article-meta.njk" %}
+    </header>
 
-  {% include "components/tldr.njk" %}
+    {% include "components/tldr.njk" %}
 
-  <div class="briefing-body">
-    {{ content | safe }}
-  </div>
+    <div class="briefing-body">
+      {{ content | safe }}
+    </div>
 
-  {% include "components/share-buttons.njk" %}
+    {% include "components/share-buttons.njk" %}
 
-  {% include "components/ad-end-of-article.njk" %}
+    {% include "components/ad-end-of-article.njk" %}
 
-  {% include "components/sources.njk" %}
+    {% include "components/sources.njk" %}
 
-  {% include "components/related-coverage.njk" %}
-</article>
+    {% include "components/related-coverage.njk" %}
+  </article>
 
-<aside class="briefing-sidebar">
-  {% include "components/newsletter-signup.njk" %}
-  {% include "components/ad-sidebar.njk" %}
-</aside>
+  <aside class="briefing-sidebar">
+    {% include "components/newsletter-signup.njk" %}
+    {% include "components/ad-sidebar.njk" %}
+  </aside>
+</div>
 {% endblock %}
 
 {% block scripts %}

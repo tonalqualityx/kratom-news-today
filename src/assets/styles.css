@@ -164,7 +164,7 @@ hr {
 }
 
 /* Two-column layout for pages with sidebar */
-.briefing,
+.briefing-layout,
 .beat-content,
 .page-content {
   display: grid;
@@ -173,7 +173,7 @@ hr {
 }
 
 @media (min-width: 900px) {
-  .briefing {
+  .briefing-layout {
     grid-template-columns: minmax(0, var(--content-width)) var(--sidebar-width);
   }
 

@@ -115,13 +115,3 @@ One case highlighted in the analysis, Devera v. Advanced Nutrition (Wyoming) LLC
 
 The Tenth Circuit appeal of the Utah ruling will test whether states can restrict kratom products that meet federal standards, a question with implications for the growing number of state-level regulatory frameworks. Meanwhile, the FDA's scheduling recommendation for synthetic 7-OH remains with the DEA, which has not yet announced a timeline for a proposed rulemaking.
 
-## Sources
-
-- [Federal judge rejects bid to halt enforcement of Utah's Kratom Regulation Act](https://www.courthousenews.com/federal-judge-rejects-bid-to-halt-enforcement-of-utahs-kratom-regulation-act/) (Courthouse News Service, May 4, 2026)
-- [Utah's kratom ban takes effect: Adulterated products should be off shelves starting today](https://utahnewsdispatch.com/2026/05/06/utahs-kratom-ban-takes-effect-adulterated-products-should-be-off-shelves-starting-today/) (Utah News Dispatch, May 6, 2026)
-- [Federal judge rejects challenge to Utah's new kratom regulation law](https://www.deseret.com/lifestyle/2026/05/11/challenge-to-kratom-law-shut-down-appeal/) (Deseret News, May 11, 2026)
-- [Utah defeats challenge to kratom law](https://attorneygeneral.utah.gov/utah-defeats-challenge-to-kratom-law/) (Utah Attorney General, May 5, 2026)
-- [Kratom makers are tweaking their 7-OH formulas to evade bans](https://www.inquirer.com/news/kratom-ban-7oh-pennsylvania-new-jersey-20260505.html) (The Philadelphia Inquirer, May 5, 2026)
-- [Not just an energy drink: National study finds kratom use is rising](https://news.umich.edu/not-just-an-energy-drink-national-study-finds-kratom-use-is-rising/) (University of Michigan News, May 2026)
-- [US Kratom Use Surges 65-Fold in 13 Years](https://www.medscape.com/viewarticle/us-kratom-use-surges-65-fold-13-years-2026a1000fx2) (Medscape, May 2026)
-- [The Emerging Kratom Litigation Landscape and Implications for Similarly Situated Manufacturers](https://www.mayerbrown.com/en/insights/publications/2026/05/the-emerging-kratom-litigation-landscape-and-implications-for-similarly-situated-manufacturers) (Mayer Brown, May 2026)

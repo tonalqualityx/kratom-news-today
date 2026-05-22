@@ -178,6 +178,12 @@ module.exports = function (eleventyConfig) {
     return array.slice(start, count ? start + count : undefined);
   });
 
+  // Find a briefing by its slug inside collections.briefings
+  eleventyConfig.addFilter("findBySlug", (collection, slug) => {
+    if (!collection || !slug) return null;
+    return collection.find((item) => item.data.slug === slug) || null;
+  });
+
   // Prepend site URL to a relative path (for RSS)
   eleventyConfig.addFilter("absoluteUrl", (url, base) => {
     if (!url) return url;

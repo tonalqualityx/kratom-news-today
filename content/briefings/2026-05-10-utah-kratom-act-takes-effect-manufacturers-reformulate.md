@@ -60,7 +60,10 @@ sources:
     publisher: "Medscape"
     published: "2026-05-01"
     excerpt: "Kratom use in the US has surged 65-fold over a 13-year period, according to national survey data."
-related_briefings: []
+related_briefings:
+  - "washington-local-governments-fill-kratom-regulatory-vacuum"
+  - "trump-floats-federal-approval-natural-7-oh"
+  - "industry-splits-over-trump-natural-7-oh-remarks"
 herald_version: "0.2.1"
 herald_options_snapshot:
   model: "sonar-pro"

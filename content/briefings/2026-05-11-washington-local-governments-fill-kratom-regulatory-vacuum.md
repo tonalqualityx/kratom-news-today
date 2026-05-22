@@ -38,6 +38,7 @@ sources:
     excerpt: "Plaintiffs filed an appeal with the U.S. Court of Appeals for the Tenth Circuit. The law remains in effect during litigation."
 related_briefings:
   - "utah-kratom-act-takes-effect-manufacturers-reformulate"
+  - "trump-floats-federal-approval-natural-7-oh"
 herald_version: "0.2.1"
 herald_options_snapshot:
   model: "sonar-pro"

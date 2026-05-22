@@ -3,7 +3,7 @@
   <h3>Related Coverage</h3>
   <ul class="related-list">
     {% for slug in related_briefings %}
-    {% set relatedPost = collections.briefings | selectattr("data.slug", "equalto", slug) | first %}
+    {% set relatedPost = collections.briefings | findBySlug(slug) %}
     {% if relatedPost %}
     <li class="related-item">
       <a href="{{ relatedPost.url }}">{{ relatedPost.data.title }}</a>

@@ -39,6 +39,8 @@ sources:
     excerpt: "The FDA recommended the DEA classify 7-hydroxymitragynine as a Schedule I controlled substance."
 related_briefings:
   - "utah-kratom-act-takes-effect-manufacturers-reformulate"
+  - "washington-local-governments-fill-kratom-regulatory-vacuum"
+  - "industry-splits-over-trump-natural-7-oh-remarks"
 herald_version: "0.2.1"
 herald_options_snapshot:
   model: "sonar-pro"

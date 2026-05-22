@@ -1,5 +1,4 @@
 {
   "layout": "briefing",
-  "permalink": "/briefings/{{ slug }}/index.html",
-  "tags": []
+  "permalink": "/briefings/{{ slug }}/index.html"
 }

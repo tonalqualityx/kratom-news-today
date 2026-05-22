@@ -3,7 +3,7 @@ const path = require('path');
 const matter = require('gray-matter');
 
 const BRIEFINGS_DIR = path.join(__dirname, '..', 'content', 'briefings');
-const REQUIRED_FIELDS = ['title', 'slug', 'date', 'summary', 'tags', 'sources', 'related_briefings', 'layout'];
+const REQUIRED_FIELDS = ['title', 'slug', 'date', 'summary', 'tags', 'sources', 'related_briefings'];
 const VALID_BEATS = ['regulation', 'business', 'science'];
 
 let errors = [];

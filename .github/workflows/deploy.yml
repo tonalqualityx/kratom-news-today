@@ -24,6 +24,9 @@ jobs:
       - name: Validate content
         run: node scripts/validate.js
 
+      - name: Generate OG images
+        run: node scripts/generate-all-og-images.js
+
       - name: Build site
         run: npx @11ty/eleventy
 

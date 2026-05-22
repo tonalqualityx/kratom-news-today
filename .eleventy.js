@@ -218,7 +218,13 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.ignores.add("scripts/**");
   eleventyConfig.ignores.add("drafts/**");
   eleventyConfig.ignores.add("agent-docs/**");
+  eleventyConfig.ignores.add("knt-herald/**");
   eleventyConfig.ignores.add("README.md");
+  eleventyConfig.ignores.add("research.md");
+  eleventyConfig.ignores.add("voice.md");
+  eleventyConfig.ignores.add("rules.md");
+  eleventyConfig.ignores.add("options.md");
+  eleventyConfig.ignores.add("research.md.bak");
 
   // ---------------------------------------------------------------------------
   // Directory config

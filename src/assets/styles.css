@@ -199,8 +199,13 @@ hr {
     gap: var(--space-12);
   }
 
+  #main-content:has(.home-featured) > .ad-slot-header,
+  #main-content:has(.home-featured) > .ad-slot-footer {
+    grid-column: 1 / -1;
+  }
+
   .home-sidebar {
-    grid-row: 1 / 3;
+    grid-row: 2 / 4;
     grid-column: 2;
   }
 }

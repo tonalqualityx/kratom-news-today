@@ -16,7 +16,3 @@ See `agent-docs/publishing-workflow.md` for the automated publishing process.
 ## Architecture
 
 See `agent-docs/build-process.md` for build and deploy details.
-
-KNT
-KNT
-KNT is readable

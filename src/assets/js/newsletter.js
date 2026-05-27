@@ -54,7 +54,7 @@
       });
 
       if (response.ok || response.status === 202) {
-        statusEl.textContent = 'Check your email to confirm your subscription.';
+        statusEl.textContent = 'Thanks for signing up for daily briefings!';
         statusEl.className = 'newsletter-status success';
         emailInput.value = '';
       } else {

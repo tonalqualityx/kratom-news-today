@@ -4,6 +4,10 @@ title: Science
 beatName: Science
 beatSlug: science
 beatDescription: "Peer-reviewed research, NIH-funded studies, university programs, harm reduction research."
-permalink: /science/index.html
 description: "Kratom science coverage: peer-reviewed research, NIH studies, university programs."
+pagination:
+  data: collections.science
+  size: 10
+  alias: posts
+permalink: "science/{% if pagination.pageNumber > 0 %}page/{{ pagination.pageNumber + 1 }}/{% endif %}index.html"
 ---

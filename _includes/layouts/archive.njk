@@ -9,25 +9,18 @@ layout: layouts/base.njk
 </header>
 
 <div class="archive-content">
-  {% set currentMonth = "" %}
-  {% for post in collections.briefings %}
-    {% set postMonth = post.date | dateFormat | slice(0, -9) %}
-    {% if postMonth != currentMonth %}
-      {% if currentMonth != "" %}</div>{% endif %}
-      {% set currentMonth = postMonth %}
-      <h2 class="archive-month">{{ post.date | dateFormat }}</h2>
-      <div class="archive-month-group">
-    {% endif %}
-    <article class="archive-item">
-      <span class="beat-label beat-{{ post.data.tags | getBeat }}">{{ post.data.tags | getBeat | capitalize }}</span>
-      <h3><a href="{{ post.url }}">{{ post.data.title }}</a></h3>
-      <time datetime="{{ post.date | dateISO }}">{{ post.date | dateFormat }}</time>
-    </article>
+  {% for post in posts %}
+  <article class="archive-item">
+    <span class="beat-label beat-{{ post.data.tags | getBeat }}">{{ post.data.tags | getBeat | capitalize }}</span>
+    <h3><a href="{{ post.url }}">{{ post.data.title }}</a></h3>
+    <time datetime="{{ post.date | dateISO }}">{{ post.date | dateFormat }}</time>
+  </article>
   {% endfor %}
-  {% if collections.briefings.length > 0 %}</div>{% endif %}
 
-  {% if not collections.briefings or collections.briefings.length == 0 %}
+  {% if not posts or posts.length == 0 %}
   <p class="empty-state">No briefings published yet. Check back soon.</p>
   {% endif %}
 </div>
+
+{% include "components/pagination-nav.njk" %}
 {% endblock %}

@@ -4,6 +4,10 @@ title: Business
 beatName: Business
 beatSlug: business
 beatDescription: "Companies, markets, retail and wholesale trends, financial news."
-permalink: /business/index.html
 description: "Kratom business coverage: companies, markets, retail and wholesale trends, financial news."
+pagination:
+  data: collections.business
+  size: 10
+  alias: posts
+permalink: "business/{% if pagination.pageNumber > 0 %}page/{{ pagination.pageNumber + 1 }}/{% endif %}index.html"
 ---

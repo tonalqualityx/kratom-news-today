@@ -1062,7 +1062,7 @@ hr {
   font-weight: 600;
 }
 
-.pagination-info {
+.pagination-status {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }

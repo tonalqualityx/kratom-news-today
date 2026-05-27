@@ -1,6 +1,10 @@
 ---
 layout: layouts/archive.njk
 title: Archive
-permalink: /archive/index.html
 description: "Full archive of all Kratom News Today briefings."
+pagination:
+  data: collections.briefings
+  size: 20
+  alias: posts
+permalink: "archive/{% if pagination.pageNumber > 0 %}page/{{ pagination.pageNumber + 1 }}/{% endif %}index.html"
 ---

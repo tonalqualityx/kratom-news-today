@@ -11,8 +11,7 @@ layout: layouts/base.njk
 
 <div class="beat-content">
   <div class="briefing-list">
-    {% set beatPosts = collections[beatSlug] %}
-    {% for post in beatPosts %}
+    {% for post in posts %}
     {% if loop.index0 == 4 %}
     {% include "components/ad-in-feed.njk" %}
     {% endif %}
@@ -23,7 +22,7 @@ layout: layouts/base.njk
     </article>
     {% endfor %}
 
-    {% if not beatPosts or beatPosts.length == 0 %}
+    {% if not posts or posts.length == 0 %}
     <p class="empty-state">No briefings in this beat yet. Check back soon.</p>
     {% endif %}
   </div>
@@ -33,4 +32,6 @@ layout: layouts/base.njk
     {% include "components/ad-sidebar.njk" %}
   </aside>
 </div>
+
+{% include "components/pagination-nav.njk" %}
 {% endblock %}

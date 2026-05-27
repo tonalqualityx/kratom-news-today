@@ -89,10 +89,11 @@ try:
     tmpl = api_call("GET", f"templates/{base_template_id}")
     html = tmpl["data"]["attributes"]["html"]
 
-    # 2. Replace placeholders
-    html = html.replace("{{ event.title }}", title)
-    html = html.replace("{{ event.summary }}", summary)
-    html = html.replace("{{ event.url }}", url)
+    # 2. Replace placeholders (normalize whitespace from block editor line breaks)
+    import re
+    html = re.sub(r'\{\{\s*event\.title\s*\}\}', title, html)
+    html = re.sub(r'\{\{\s*event\.summary\s*\}\}', summary, html)
+    html = re.sub(r'\{\{\s*event\.url\s*\}\}', url, html)
 
     # 3. Create temp code template
     temp_tmpl = api_call("POST", "templates/", {

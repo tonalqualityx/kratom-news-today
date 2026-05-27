@@ -37,10 +37,16 @@
           data: {
             type: 'subscription',
             attributes: {
+              custom_source: 'KNT Website Signup',
               profile: {
                 data: {
                   type: 'profile',
-                  attributes: { email: email }
+                  attributes: {
+                    email: email,
+                    subscriptions: {
+                      email: { marketing: { consent: 'SUBSCRIBED' } }
+                    }
+                  }
                 }
               }
             },

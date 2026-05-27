@@ -132,6 +132,9 @@ try:
                         }
                     }]
                 },
+                "send_options": {
+                    "use_smart_sending": False
+                },
                 "send_strategy": {
                     "method": "immediate"
                 }

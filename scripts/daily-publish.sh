@@ -55,15 +55,18 @@ send_klaviyo_campaign() {
 
   log "Preparing Klaviyo campaign..."
 
-  # Step 1: Read the template, swap placeholders, update it, then restore after
-  TEMPLATE_UPDATED=$(python3 << PYEOF
-import json, sys, urllib.request
+  # Single Python script handles entire Klaviyo flow:
+  # 1. Read base template (block-based, read-only)
+  # 2. Replace placeholders with briefing data
+  # 3. Create temp code-based template with populated HTML
+  # 4. Create and send campaign using temp template
+  # 5. Delete temp template
+  CAMPAIGN_RESULT=$(python3 - "$KLAVIYO_API_KEY" "$KLAVIYO_TEMPLATE_ID" "$KLAVIYO_LIST_ID" "$title" "$summary" "$url" << 'PYEOF'
+import json, urllib.request, sys, datetime
 
-api_key = "$KLAVIYO_API_KEY"
-template_id = "$KLAVIYO_TEMPLATE_ID"
-title = $(python3 -c "import json; print(json.dumps('$title'))")
-summary = $(python3 -c "import json; print(json.dumps('$summary'))")
-url = "$url"
+api_key, base_template_id, list_id = sys.argv[1], sys.argv[2], sys.argv[3]
+title, summary, url = sys.argv[4], sys.argv[5], sys.argv[6]
+today = datetime.date.today().isoformat()
 
 headers = {
     "Authorization": f"Klaviyo-API-Key {api_key}",
@@ -71,180 +74,131 @@ headers = {
     "revision": "2024-02-15"
 }
 
-# Read template
-req = urllib.request.Request(
-    f"https://a.klaviyo.com/api/templates/{template_id}",
-    headers=headers
-)
-resp = urllib.request.urlopen(req)
-data = json.loads(resp.read())
-original_html = data["data"]["attributes"]["html"]
+def api_call(method, endpoint, data=None):
+    payload = json.dumps(data).encode() if data else None
+    req = urllib.request.Request(
+        f"https://a.klaviyo.com/api/{endpoint}",
+        data=payload, headers=headers, method=method
+    )
+    resp = urllib.request.urlopen(req)
+    return json.loads(resp.read()) if resp.status != 204 else None
 
-# Replace placeholders
-updated_html = original_html.replace("{{ event.title }}", title)
-updated_html = updated_html.replace("{{ event.summary }}", summary)
-updated_html = updated_html.replace("{{ event.url }}", url)
+temp_id = None
+try:
+    # 1. Read base template HTML
+    tmpl = api_call("GET", f"templates/{base_template_id}")
+    html = tmpl["data"]["attributes"]["html"]
 
-# Update template
-update_payload = json.dumps({
-    "data": {
-        "type": "template",
-        "id": template_id,
-        "attributes": {
-            "html": updated_html
-        }
-    }
-}).encode()
+    # 2. Replace placeholders
+    html = html.replace("{{ event.title }}", title)
+    html = html.replace("{{ event.summary }}", summary)
+    html = html.replace("{{ event.url }}", url)
 
-req = urllib.request.Request(
-    f"https://a.klaviyo.com/api/templates/{template_id}",
-    data=update_payload,
-    headers=headers,
-    method="PATCH"
-)
-resp = urllib.request.urlopen(req)
-
-# Save original HTML for restore
-with open("/tmp/knt-template-backup.json", "w") as f:
-    json.dump({"html": original_html}, f)
-
-print("OK")
-PYEOF
-  )
-
-  if [ "$TEMPLATE_UPDATED" != "OK" ]; then
-    log "WARN: Failed to update Klaviyo template"
-    return
-  fi
-
-  log "Template updated with briefing content. Creating campaign..."
-
-  # Step 2: Create the campaign
-  CAMPAIGN_RESPONSE=$(python3 << PYEOF
-import json, urllib.request
-
-api_key = "$KLAVIYO_API_KEY"
-title = $(python3 -c "import json; print(json.dumps('$title'))")
-
-payload = json.dumps({
-    "data": {
-        "type": "campaign",
-        "attributes": {
-            "name": f"Daily Briefing: {title}",
-            "audiences": {
-                "included": [{"type": "list", "id": "$KLAVIYO_LIST_ID"}]
-            },
-            "campaign-messages": {
-                "data": [{
-                    "type": "campaign-message",
-                    "attributes": {
-                        "channel": "email",
-                        "label": "Daily Briefing",
-                        "content": {
-                            "subject": title,
-                            "from_email": "briefing@kratomnewstoday.com",
-                            "from_label": "Kratom News Today"
-                        },
-                        "template_id": "$KLAVIYO_TEMPLATE_ID"
-                    }
-                }]
-            },
-            "send_strategy": {
-                "method": "immediate"
+    # 3. Create temp code template
+    temp_tmpl = api_call("POST", "templates/", {
+        "data": {
+            "type": "template",
+            "attributes": {
+                "name": f"KNT Briefing {today} (auto)",
+                "editor_type": "CODE",
+                "html": html
             }
         }
-    }
-}).encode()
+    })
+    temp_id = temp_tmpl["data"]["id"]
+    print(f"Temp template: {temp_id}", file=sys.stderr)
 
-req = urllib.request.Request(
-    "https://a.klaviyo.com/api/campaigns/",
-    data=payload,
-    headers={
-        "Authorization": f"Klaviyo-API-Key {api_key}",
-        "Content-Type": "application/json",
-        "revision": "2024-02-15"
-    }
-)
-resp = urllib.request.urlopen(req)
-data = json.loads(resp.read())
-print(data["data"]["id"])
+    # 4. Create campaign
+    campaign = api_call("POST", "campaigns/", {
+        "data": {
+            "type": "campaign",
+            "attributes": {
+                "name": f"Daily Briefing: {title[:80]}",
+                "audiences": {
+                    "included": [list_id]
+                },
+                "campaign-messages": {
+                    "data": [{
+                        "type": "campaign-message",
+                        "attributes": {
+                            "channel": "email",
+                            "label": "Daily Briefing",
+                            "content": {
+                                "subject": title,
+                                "from_email": "briefing@kratomnewstoday.com",
+                                "from_label": "Kratom News Today"
+                            }
+                        }
+                    }]
+                },
+                "send_strategy": {
+                    "method": "immediate"
+                }
+            }
+        }
+    })
+    campaign_id = campaign["data"]["id"]
+    msg_id = campaign["data"]["relationships"]["campaign-messages"]["data"][0]["id"]
+    print(f"Campaign: {campaign_id}, Message: {msg_id}", file=sys.stderr)
+
+    # 5. Assign template to campaign message
+    api_call("POST", "campaign-message-assign-template/", {
+        "data": {
+            "type": "campaign-message",
+            "id": msg_id,
+            "relationships": {
+                "template": {
+                    "data": {"type": "template", "id": temp_id}
+                }
+            }
+        }
+    })
+    print("Template assigned", file=sys.stderr)
+
+    # 6. Send campaign
+    api_call("POST", "campaign-send-jobs/", {
+        "data": {
+            "type": "campaign-send-job",
+            "id": campaign_id
+        }
+    })
+
+    # 7. Delete temp template
+    try:
+        req = urllib.request.Request(
+            f"https://a.klaviyo.com/api/templates/{temp_id}",
+            headers=headers, method="DELETE"
+        )
+        urllib.request.urlopen(req)
+    except Exception:
+        pass
+
+    print("OK")
+
+except urllib.error.HTTPError as e:
+    print(f"ERROR: {e.code} {e.read().decode()}", file=sys.stderr)
+    # Clean up temp template if created
+    if temp_id:
+        try:
+            req = urllib.request.Request(
+                f"https://a.klaviyo.com/api/templates/{temp_id}",
+                headers=headers, method="DELETE"
+            )
+            urllib.request.urlopen(req)
+        except Exception:
+            pass
+    print("FAIL")
+except Exception as e:
+    print(f"ERROR: {e}", file=sys.stderr)
+    print("FAIL")
 PYEOF
   )
 
-  if [ -z "$CAMPAIGN_RESPONSE" ]; then
-    log "WARN: Failed to create Klaviyo campaign"
-    # Restore template before returning
-    python3 -c "
-import json, urllib.request
-with open('/tmp/knt-template-backup.json') as f:
-    original = json.load(f)['html']
-payload = json.dumps({'data': {'type': 'template', 'id': '$KLAVIYO_TEMPLATE_ID', 'attributes': {'html': original}}}).encode()
-req = urllib.request.Request('https://a.klaviyo.com/api/templates/$KLAVIYO_TEMPLATE_ID', data=payload, headers={'Authorization': 'Klaviyo-API-Key $KLAVIYO_API_KEY', 'Content-Type': 'application/json', 'revision': '2024-02-15'}, method='PATCH')
-urllib.request.urlopen(req)
-" 2>/dev/null
-    return
+  if [ "$CAMPAIGN_RESULT" = "OK" ]; then
+    log "Klaviyo campaign sent successfully."
+  else
+    log "WARN: Klaviyo campaign failed. Check log for details."
   fi
-
-  CAMPAIGN_ID="$CAMPAIGN_RESPONSE"
-  log "Campaign created: $CAMPAIGN_ID. Sending..."
-
-  # Step 3: Send the campaign
-  python3 << PYEOF
-import json, urllib.request
-
-payload = json.dumps({
-    "data": {
-        "type": "campaign-send-job",
-        "id": "$CAMPAIGN_ID"
-    }
-}).encode()
-
-req = urllib.request.Request(
-    "https://a.klaviyo.com/api/campaign-send-jobs/",
-    data=payload,
-    headers={
-        "Authorization": "Klaviyo-API-Key $KLAVIYO_API_KEY",
-        "Content-Type": "application/json",
-        "revision": "2024-02-15"
-    }
-)
-urllib.request.urlopen(req)
-PYEOF
-
-  log "Campaign sent."
-
-  # Step 4: Restore the template with placeholders
-  python3 << PYEOF
-import json, urllib.request
-
-with open("/tmp/knt-template-backup.json") as f:
-    original_html = json.load(f)["html"]
-
-payload = json.dumps({
-    "data": {
-        "type": "template",
-        "id": "$KLAVIYO_TEMPLATE_ID",
-        "attributes": {
-            "html": original_html
-        }
-    }
-}).encode()
-
-req = urllib.request.Request(
-    "https://a.klaviyo.com/api/templates/$KLAVIYO_TEMPLATE_ID",
-    data=payload,
-    headers={
-        "Authorization": "Klaviyo-API-Key $KLAVIYO_API_KEY",
-        "Content-Type": "application/json",
-        "revision": "2024-02-15"
-    },
-    method="PATCH"
-)
-urllib.request.urlopen(req)
-PYEOF
-
-  log "Template restored with placeholders."
-  rm -f /tmp/knt-template-backup.json
 }
 
 # --- Main ---

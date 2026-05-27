@@ -41,12 +41,7 @@
               profile: {
                 data: {
                   type: 'profile',
-                  attributes: {
-                    email: email,
-                    subscriptions: {
-                      email: { marketing: { consent: 'SUBSCRIBED' } }
-                    }
-                  }
+                  attributes: { email: email }
                 }
               }
             },

@@ -27,7 +27,7 @@
     statusEl.className = 'newsletter-status';
 
     try {
-      const response = await fetch('https://a.klaviyo.com/client/subscriptions/', {
+      const response = await fetch('https://a.klaviyo.com/client/subscriptions/?company_id=' + encodeURIComponent(companyId), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -9,6 +9,8 @@ LOG_DIR="/home/mike/.local/log"
 LOG_FILE="$LOG_DIR/knt-herald-$(date +%Y-%m-%d).log"
 SLACK_CHANNEL="C0AEBQ36W05"  # #bast-chat
 SITE_URL="https://kratomnewstoday.com"
+PUBLISH_TIMEOUT=1200   # max seconds for the claude publish step before we kill it (20 min)
+MAX_ATTEMPTS=2         # how many times to attempt publish if no briefing lands
 
 mkdir -p "$LOG_DIR"
 
@@ -205,6 +207,58 @@ PYEOF
   fi
 }
 
+# Send Slack + Klaviyo notifications for a single published briefing slug.
+# Reads title / beat / TL;DR straight from the committed file — does NOT depend
+# on Claude's JSON output, so it works even when the publish step was killed.
+notify_for_slug() {
+  local slug="$1"
+  local file
+  file=$(ls "$REPO_DIR/content/briefings/"*"$slug"*.md 2>/dev/null | head -1)
+  if [ -z "$file" ]; then
+    log "WARN: could not find briefing file for slug '$slug', skipping notify"
+    return 1
+  fi
+
+  local meta
+  meta=$(python3 - "$file" << 'PYEOF'
+import sys, re, json
+content = open(sys.argv[1]).read()
+def fm(key):
+    m = re.search(r'^%s:\s*"?(.+?)"?\s*$' % key, content, re.MULTILINE)
+    return m.group(1).strip() if m else ''
+title = fm('title')
+beat = ''
+m = re.search(r'^tags:\s*\n((?:\s*-\s*.+\n?)+)', content, re.MULTILINE)
+if m:
+    t = re.search(r'-\s*(.+)', m.group(1))
+    beat = t.group(1).strip() if t else ''
+# The TL;DR is the `summary` frontmatter — single source of truth, also used
+# for the on-page callout, SEO meta, schema.org, OG image, and homepage cards.
+summary = fm('summary')
+print(json.dumps({'title': title, 'beat': beat, 'summary': summary}))
+PYEOF
+)
+  local title beat summary url
+  title=$(echo "$meta" | python3 -c "import json,sys; print(json.load(sys.stdin)['title'])" 2>/dev/null)
+  beat=$(echo "$meta" | python3 -c "import json,sys; print(json.load(sys.stdin)['beat'])" 2>/dev/null)
+  summary=$(echo "$meta" | python3 -c "import json,sys; print(json.load(sys.stdin)['summary'])" 2>/dev/null)
+  url="$SITE_URL/briefings/$slug/"
+
+  log "Notifying for: $title"
+
+  local payload
+  payload=$(python3 -c "
+import json, sys
+title, beat, url, chan = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+beat_tag = f' [{beat}]' if beat else ''
+msg = '\n'.join(['📰 *KNT Daily Briefing Published*', '', f'<{url}|{title}>{beat_tag}', '', '1 briefing(s) live.'])
+print(json.dumps({'channel': chan, 'text': msg, 'unfurl_links': False}))
+" "$title" "$beat" "$url" "$SLACK_CHANNEL" 2>/dev/null)
+  slack_notify_json "$payload"
+
+  send_klaviyo_campaign "$title" "$summary" "$url"
+}
+
 # --- Main ---
 log "=== KNT Daily Publish starting ==="
 cd "$REPO_DIR"
@@ -217,12 +271,11 @@ git pull --ff-only origin main >> "$LOG_FILE" 2>&1 || {
   exit 1
 }
 
-# Run Herald via Claude Code in non-interactive mode
-log "Running Herald research + publish pipeline..."
-CLAUDE_OUTPUT=$(claude -p \
-  --dangerously-skip-permissions \
-  --max-budget-usd 5.00 \
-  "You are running the KNT daily publishing workflow. Follow these steps exactly:
+# Record where we started so we can detect what (if anything) got published,
+# independent of whatever Claude prints to stdout.
+START_HEAD=$(git rev-parse HEAD)
+
+PUBLISH_PROMPT="You are running the KNT daily publishing workflow. Follow these steps exactly:
 
 1. Run herald run --config-dir /home/mike/Documents/kratom-news-today
    This invokes the Herald skill which will research, triage, synthesize, and check briefings.
@@ -234,76 +287,83 @@ CLAUDE_OUTPUT=$(claude -p \
    - Commit with message format: publish: <title>
    - Push to origin main
 
-3. After push, output ONLY a JSON object on the last line with this structure (no other text after it):
-   {\"status\":\"success\",\"slugs\":[\"the-slug\"],\"titles\":[\"The Title\"],\"beats\":[\"regulation\"]}
+3. After push, output ONLY a JSON object on the last line:
+   {\"status\":\"success\",\"slugs\":[\"the-slug\"]}
+   If anything fails, output: {\"status\":\"error\",\"message\":\"what went wrong\"}
 
-   If anything fails, output:
-   {\"status\":\"error\",\"message\":\"what went wrong\"}
+Do not ask questions. Do not wait for input. Do NOT start a dev server or any
+long-running foreground process. Execute the full pipeline and exit."
 
-Do not ask questions. Do not wait for input. Execute the full pipeline." 2>> "$LOG_FILE") || {
-  log "ERROR: Claude Code exited with non-zero status"
-  slack_notify "⚠ KNT daily publish failed: Claude Code error. Check $LOG_FILE"
-  exit 1
+# Run the publish step under a hard wall-clock timeout. timeout sends SIGTERM at
+# the limit, then SIGKILL 30s later if it's still alive — so a hung Claude can no
+# longer block the script (and the notifications) forever.
+run_publish() {
+  set +e
+  timeout -k 30 "$PUBLISH_TIMEOUT" claude -p \
+    --dangerously-skip-permissions \
+    --max-budget-usd 5.00 \
+    "$PUBLISH_PROMPT" >> "$LOG_FILE" 2>&1
+  local rc=$?
+  set -e
+  return "$rc"
 }
 
-# Save full output to log
-echo "$CLAUDE_OUTPUT" >> "$LOG_FILE"
+# Print newly-added/modified briefing files since START_HEAD (empty if none committed).
+new_briefings() {
+  git diff --name-only --diff-filter=AM "$START_HEAD" HEAD -- content/briefings/ 2>/dev/null | grep '\.md$' || true
+}
 
-# Parse the JSON result from the last line
-RESULT_JSON=$(echo "$CLAUDE_OUTPUT" | grep -o '{.*}' | tail -1)
+PUBLISHED_FILES=""
+attempt=1
+while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
+  log "Running Herald research + publish pipeline (attempt $attempt/$MAX_ATTEMPTS, timeout ${PUBLISH_TIMEOUT}s)..."
+  rc=0; run_publish || rc=$?
+  if [ "$rc" -eq 124 ]; then
+    log "WARN: publish step hit the ${PUBLISH_TIMEOUT}s timeout and was killed."
+  elif [ "$rc" -ne 0 ]; then
+    log "WARN: publish step exited non-zero (rc=$rc)."
+  else
+    log "Publish step exited cleanly."
+  fi
 
-if [ -z "$RESULT_JSON" ]; then
-  log "WARN: Could not parse result JSON from Claude output"
-  slack_notify "⚠ KNT daily publish completed but couldn't parse results. Check $LOG_FILE"
-  exit 0
+  # Did a briefing actually land, regardless of how Claude exited?
+  PUBLISHED_FILES=$(new_briefings)
+  if [ -n "$PUBLISHED_FILES" ]; then
+    log "Detected published briefing(s):"
+    echo "$PUBLISHED_FILES" | tee -a "$LOG_FILE"
+    break
+  fi
+
+  log "No new briefing detected after attempt $attempt."
+  attempt=$((attempt + 1))
+done
+
+# Nothing published after all attempts → loud failure, no silent exit.
+if [ -z "$PUBLISHED_FILES" ]; then
+  log "ERROR: no briefing published after $MAX_ATTEMPTS attempt(s)."
+  slack_notify "⚠ KNT daily publish FAILED: no briefing published after $MAX_ATTEMPTS attempt(s). Check $LOG_FILE"
+  exit 1
 fi
 
-STATUS=$(echo "$RESULT_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status','unknown'))" 2>/dev/null)
-
-if [ "$STATUS" = "success" ]; then
-  # Build the Slack message with links
-  SLACK_MSG=$(echo "$RESULT_JSON" | python3 -c "
-import json, sys
-d = json.load(sys.stdin)
-slugs = d.get('slugs', [])
-titles = d.get('titles', [])
-beats = d.get('beats', [])
-site = '$SITE_URL'
-lines = ['📰 *KNT Daily Briefing Published*', '']
-for i, slug in enumerate(slugs):
-    title = titles[i] if i < len(titles) else slug
-    beat = beats[i] if i < len(beats) else ''
-    beat_tag = f' [{beat}]' if beat else ''
-    lines.append(f'<{site}/briefings/{slug}/|{title}>{beat_tag}')
-lines.append('')
-lines.append(f'{len(slugs)} briefing(s) live.')
-print('\n'.join(lines))
-" 2>/dev/null)
-
-  log "SUCCESS: Published $(echo "$RESULT_JSON" | python3 -c "import json,sys; print(len(json.load(sys.stdin).get('slugs',[])))" 2>/dev/null) briefing(s)"
-
-  # Send rich Slack notification
-  PAYLOAD=$(python3 -c "
-import json
-msg = '''$SLACK_MSG'''
-print(json.dumps({'channel': '$SLACK_CHANNEL', 'text': msg, 'unfurl_links': False}))
-" 2>/dev/null)
-  slack_notify_json "$PAYLOAD"
-
-  # Send Klaviyo daily briefing email
-  FIRST_TITLE=$(echo "$RESULT_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('titles',[''])[0])" 2>/dev/null)
-  FIRST_SLUG=$(echo "$RESULT_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('slugs',[''])[0])" 2>/dev/null)
-  FIRST_SUMMARY=$(echo "$RESULT_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('summaries',[''])[0] if d.get('summaries') else '')" 2>/dev/null)
-  BRIEFING_URL="$SITE_URL/briefings/$FIRST_SLUG/"
-  send_klaviyo_campaign "$FIRST_TITLE" "$FIRST_SUMMARY" "$BRIEFING_URL"
-
-elif [ "$STATUS" = "error" ]; then
-  ERROR_MSG=$(echo "$RESULT_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('message','unknown error'))" 2>/dev/null)
-  log "ERROR: $ERROR_MSG"
-  slack_notify "⚠ KNT daily publish failed: $ERROR_MSG"
-else
-  log "WARN: Unknown status: $STATUS"
-  slack_notify "⚠ KNT daily publish returned unknown status. Check $LOG_FILE"
+# A timeout-kill can land between commit and push — make sure it's on origin.
+if [ -n "$(git log origin/main..HEAD --oneline 2>/dev/null)" ]; then
+  log "Local commit(s) not on origin yet — pushing..."
+  git push origin main >> "$LOG_FILE" 2>&1 || {
+    log "ERROR: git push failed"
+    slack_notify "⚠ KNT publish: briefing committed but PUSH FAILED. Check $LOG_FILE"
+    exit 1
+  }
 fi
 
+# Notify (Slack + Klaviyo) per published briefing, sourced from the committed files.
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  slug=$(python3 -c "import re,sys; c=open(sys.argv[1]).read(); m=re.search(r'^slug:\s*\"?(.+?)\"?\s*\$', c, re.M); print(m.group(1) if m else '')" "$f" 2>/dev/null)
+  if [ -z "$slug" ]; then
+    slug=$(basename "$f" .md | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//')
+  fi
+  notify_for_slug "$slug"
+done <<< "$PUBLISHED_FILES"
+
+log "SUCCESS: published and notified."
 log "=== KNT Daily Publish finished ==="

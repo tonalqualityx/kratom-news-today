@@ -95,6 +95,12 @@ fileDataMap.forEach((data, file) => {
   if (!parsed.content || parsed.content.trim().length === 0) {
     errors.push(`${file}: Body content is empty`);
   }
+
+  // The TL;DR is the `summary` frontmatter, rendered as a callout by tldr.njk.
+  // It must NOT be repeated in the body or it renders twice on the page.
+  if (parsed.content && /^\s*(#{1,6}\s*TL;?DR|\*\*TL;?DR)/im.test(parsed.content)) {
+    errors.push(`${file}: Body contains a TL;DR section — remove it; the TL;DR lives in the "summary" frontmatter (rendered as a callout). Duplicate renders twice.`);
+  }
 });
 
 console.log(`Validated ${fileCount} briefing file(s).`);

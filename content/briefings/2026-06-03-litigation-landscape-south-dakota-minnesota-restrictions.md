@@ -71,10 +71,6 @@ herald_options_snapshot:
   embedding_model: text-embedding-3-small
 ---
 
-## TL;DR
-
-A Mayer Brown legal analysis outlined product-liability, failure-to-warn, and deceptive-marketing risks facing kratom manufacturers as federal and state enforcement intensifies. South Dakota's Senate panel advanced bills to ban kratom outright, Minnesota lawmakers floated Schedule II classification with a 21-and-older purchase age, and a New York Senate bill would schedule kratom as a controlled substance weeks after the governor signed age and labeling restrictions.
-
 ## Mayer Brown Flags Growing Litigation Exposure for Kratom Companies
 
 Law firm Mayer Brown published a [legal analysis](https://www.mayerbrown.com/en/insights/publications/2026/05/the-emerging-kratom-litigation-landscape-and-implications-for-similarly-situated-manufacturers) in late May warning that manufacturers, retailers, and distributors of kratom and 7-hydroxymitragynine (7-OH) products face a "growing" combination of FDA enforcement, state enforcement, and product-liability risk. The analysis noted that wrongful-death claims, failure-to-warn suits, and allegations of deceptive marketing are increasing across the industry.

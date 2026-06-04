@@ -72,10 +72,6 @@ herald_options_snapshot:
   embedding_model: text-embedding-3-small
 ---
 
-## TL;DR
-
-Missouri Attorney General Catherine Hanaway expanded her statewide kratom investigation to 22 entities, adding 10 manufacturers, distributors, and retailers and broadening the probe to cover the supply chain. Ohio introduced the Kratom Consumer Protection Act (HB 587), which would license distributors and retailers while banning synthetic kratom and concentrated 7-hydroxymitragynine (7-OH) products. The Global Kratom Coalition endorsed a federal bill that would classify 7-OH as a Schedule I substance.
-
 ## Missouri AG Adds 10 Entities, Widens Probe to Supply Chain
 
 Missouri Attorney General Catherine Hanaway [announced](https://ago.mo.gov/attorney-general-hanaway-expands-kratom-investigation-to-target-supply-chain/) an expansion of her office's kratom and 7-OH investigation, issuing Civil Investigative Demands (CIDs) to 10 additional entities across manufacturers, distributors, and retailers. The move brings the total number of entities under investigation to 22.

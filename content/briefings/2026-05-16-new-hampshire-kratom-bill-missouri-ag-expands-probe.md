@@ -59,8 +59,6 @@ herald_options_snapshot:
   embedding_model: "text-embedding-3-small"
 ---
 
-**TL;DR:** New Hampshire's House passed a bill Thursday banning the sale of kratom products with enhanced 7-hydroxymitragynine levels through Liquor Commission licensees. Missouri Attorney General Catherine Hanaway widened her kratom investigation to 22 firms, targeting the full supply chain, though a judge earlier this month denied her bid to halt sales by CBD American Shaman.
-
 ## New Hampshire House targets enhanced 7-OH products
 
 The New Hampshire House passed legislation on Thursday that would prohibit any licensee of the state's Liquor Commission from selling kratom products containing "enhanced levels" of 7-hydroxymitragynine (7-OH) beyond what occurs naturally in the kratom leaf. The [Concord Monitor reported](https://www.concordmonitor.com/2026/05/16/kratom-regulation-new-hampshire/) on the bill as part of a broader feature examining New Hampshire's evolving relationship with kratom regulation.

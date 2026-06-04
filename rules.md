@@ -32,7 +32,7 @@ These constraints are enforced by the rules-check agent. Violations are flagged 
 
 3. **Always describe what is being reported, not what is true.** "A study found that participants showed reduced anxiety scores" — not "kratom reduces anxiety." This framing applies to all categories: science, regulation, business.
 
-4. **Always include a TL;DR block at the top of every briefing.** 2-3 sentences. Standalone — readable without the rest of the article. The headline plus the TL;DR should give the reader the gist of the story.
+4. **Always provide a TL;DR via the `summary` frontmatter field.** 2-3 sentences. Standalone — readable without the rest of the article. The headline plus the TL;DR should give the reader the gist of the story. The site renders `summary` as a TL;DR callout at the top of the page automatically — do NOT add a TL;DR heading or `**TL;DR:**` line in the body, or it will render twice.
 
 5. **Always end briefings with a Sources section.** Every primary source mentioned in the body appears in the Sources section with publisher, date, and URL. The Sources section is non-negotiable.
 

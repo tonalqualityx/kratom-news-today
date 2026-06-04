@@ -57,10 +57,6 @@ related_briefings:
   - "senators-push-full-kratom-scheduling-states-crack-down"
 ---
 
-## TL;DR
-
-Missouri Attorney General Catherine Hanaway announced a statewide investigation into kratom manufacturers and retailers, issuing six Civil Investigative Demands to companies including CBD Kratom and CBD American Shaman over alleged failures to disclose 7-hydroxymitragynine (7-OH) content. Connecticut became the seventh state to schedule kratom as a controlled substance, and Tennessee's legislature passed a full ban on kratom sales and possession.
-
 ## Missouri AG Issues Six Civil Investigative Demands
 
 Missouri Attorney General Catherine Hanaway [announced](https://ago.mo.gov/attorney-general-hanaway-launches-investigation-into-major-kratom-manufacturers-and-retailers-for-potentially-dangerous-and-illegal-practices/) a statewide investigation into kratom manufacturers and distributors, saying consumers may be exposed to "unapproved, unsafe, and deceptively marketed opioid-like drugs." The office issued six Civil Investigative Demands (CIDs) to CBD Kratom, The Green Dragon CBD, Emporium Smoke Shop, Moonlight Smoke Shop, CBD American Shaman, and Shaman Botanicals.

@@ -85,10 +85,6 @@ herald_options_snapshot:
   embedding_model: text-embedding-3-small
 ---
 
-## TL;DR
-
-California's Assembly is advancing AB 1088, a bill that would bring kratom and 7-hydroxymitragynine (7-OH) products under the state's Sherman Food, Drug, and Cosmetic Law. North Carolina has introduced a separate regulatory framework that would require kratom manufacturers and distributors to obtain state licenses by July 1, 2026. The American Kratom Association (AKA) announced a Congressional Briefing on FDA 7-OH enforcement and consumer protection legislation, scheduled for June 3.
-
 ## California Moves to Regulate Kratom Products Under Existing Food and Drug Law
 
 AB 1088, currently advancing through the California Legislature, would add kratom and 7-OH products to the Sherman Food, Drug, and Cosmetic Law, [according to bill tracking records](https://calmatters.digitaldemocracy.org/bills/ca_202520260ab1088). The bill would impose alkaloid concentration limits on products sold in the state, require child-resistant packaging, and prohibit sales to anyone under 21.

@@ -62,8 +62,6 @@ herald_options_snapshot:
   embedding_model: "text-embedding-3-small"
 ---
 
-**TL;DR:** New York Senator Scarcella-Spanton introduced the "Synthetic Kratom Kills Act" (S10514), which would ban synthetic kratom products while explicitly preserving access to natural leaf. The same week, a documentary about kratom-related deaths premieres in Jacksonville, and Florida death data continues to draw scrutiny from investigators and lawmakers.
-
 ## New York targets synthetic kratom with S10514
 
 Senator Scarcella-Spanton introduced [S10514, the "Synthetic Kratom Kills Act,"](https://www.nysenate.gov/legislation/bills/2025/S10514) on May 15. The bill would prohibit the manufacture, distribution, and sale of synthesized kratom material and adulterated kratom products in New York. It would also ban kratom products intended for combustion or vaporization, kratom sold in conventional food and beverages (with an exception for traditional tea), kratom with flavoring designed to appeal to consumers under 21, and any kratom product not packaged in child-resistant packaging. Sales to anyone under 21 would be prohibited.

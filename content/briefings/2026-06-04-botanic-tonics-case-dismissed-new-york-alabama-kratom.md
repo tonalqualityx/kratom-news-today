@@ -70,10 +70,6 @@ herald_options_snapshot:
   embedding_model: "text-embedding-3-small"
 ---
 
-## TL;DR
-
-The federal government dismissed its enforcement case against Botanic Tonics, the maker of Feel Free kratom beverages. New York Governor Kathy Hochul signed two laws banning kratom sales to anyone under 21 and requiring warning labels on all kratom products sold in the state. Alabama Attorney General Steve Marshall issued a statewide cease-and-desist order against retailers selling products containing mitragynine and 7-hydroxymitragynine (7-OH), which the state classifies as Schedule I substances under Alabama law.
-
 ## Federal government drops Botanic Tonics case
 
 The federal government dismissed its enforcement case against Botanic Tonics LLC, the manufacturer of Feel Free kratom-based beverages, [according to Kratom Anonymous](https://www.kratomanonymous.com/news). The case had been one of the FDA's higher-profile enforcement actions against a branded kratom product line, and the dismissal drew attention from industry observers.

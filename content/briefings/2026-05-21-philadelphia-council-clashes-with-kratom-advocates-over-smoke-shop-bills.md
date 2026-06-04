@@ -57,8 +57,6 @@ herald_options_snapshot:
   embedding_model: "text-embedding-3-small"
 ---
 
-**TL;DR:** Philadelphia City Council held a heated, three-plus-hour hearing on two bills that would classify kratom and hemp-derived THC as "intoxicating substances," require special licensing for sellers, and restrict buyers to age 21 and older. Kratom advocates warned the bills would function as a de facto ban, while community leaders backed the measures as a tool to curb smoke-shop-related crime. The city's broad approach contrasts sharply with pending state legislation in Pennsylvania and New Jersey, which targets synthetic and concentrated 7-OH products while leaving natural kratom leaf alone.
-
 ## Council hearing draws nearly two dozen speakers
 
 Philadelphia City Council's May 21 hearing on two bills introduced by Majority Leader Katherine Gilmore-Richardson ran more than three hours and drew nearly two dozen speakers, [the Inquirer reported](https://www.inquirer.com/news/philadelphia/kratom-philadelphia-city-council-bill-regulation-20260521.html). The more contentious of the two bills would define kratom and hemp-based THC products as "intoxicating substances," requiring sellers to obtain a special license, comply with testing requirements, and verify that buyers are at least 21 years old.

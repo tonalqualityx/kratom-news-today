@@ -64,10 +64,6 @@ related_briefings:
   - "missouri-ag-kratom-probe-connecticut-tennessee-act"
 ---
 
-## TL;DR
-
-The Arizona Senate passed HB 2415, a bill that would raise the state's kratom purchase age to 21, ban synthetically derived kratom products, and classify high-concentration 7-hydroxymitragynine (7-OH) products as narcotic drugs. Separately, Delaware is considering SB 262, which would place kratom into the state's controlled-substances framework. Federal marshals also seized more than 100 cases of kratom products in California.
-
 ## Arizona Senate Advances Age-21, Synthetic-Ban Framework
 
 The Arizona Senate passed [HB 2415](https://www.azleg.gov/legtext/57leg/2R/summary/H.HB2415_012926_SENATEENGROSSED.DOCX.htm), a bill sponsored by Representative Nguyen that would overhaul the state's approach to kratom regulation, according to the bill's engrossed summary published by the Arizona Legislature. The measure would raise the minimum purchase age from 18 to 21, require revised product labeling, prohibit the sale of synthetically derived kratom products, and classify products with high concentrations of 7-hydroxymitragynine as narcotic drugs under state law.

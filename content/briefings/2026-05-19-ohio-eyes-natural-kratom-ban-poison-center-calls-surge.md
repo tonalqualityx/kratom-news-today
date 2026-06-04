@@ -55,8 +55,6 @@ herald_options_snapshot:
   embedding_model: "text-embedding-3-small"
 ---
 
-**TL;DR:** Ohio's permanent ban on synthetic kratom is now in effect, replacing the Board of Pharmacy's earlier emergency order. The Board is also weighing whether to extend restrictions to natural kratom, a move that would represent a significant escalation. Separately, CDC data continues to generate coverage showing kratom-related poison center calls rose 1,200% over the past decade.
-
 ## Ohio synthetic ban is permanent; natural kratom may be next
 
 The [Statehouse News Bureau reported](https://www.statenews.org/government-politics/2026-05-19/ban-on-synthetic-kratom-in-effect-in-ohio-but-more-action-could-be-coming) on Monday that Ohio's permanent ban on synthetic kratom is now in effect, replacing the temporary emergency ban the Board of Pharmacy issued [earlier this month][ohio-synthetic-kratom-ban-takes-effect]. The permanent rule codifies what the emergency order established: synthetic 7-hydroxymitragynine (7-OH) preparations are prohibited from sale in the state.

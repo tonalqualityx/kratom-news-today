@@ -51,8 +51,6 @@ herald_options_snapshot:
   embedding_model: "text-embedding-3-small"
 ---
 
-**TL;DR:** New York Gov. Kathy Hochul signed two kratom bills into law, restricting sales to adults 21 and older and requiring warning labels statewide. The Michigan House passed HB 5537 on a party-line vote, which would ban kratom growth, sale, and import entirely if the Senate concurs. The two actions represent opposite ends of the regulatory spectrum now playing out across states.
-
 ## New York enacts age limit and warning labels
 
 [Governor Hochul signed two kratom bills](https://www.governor.ny.gov/news/governor-hochul-signs-two-pieces-landmark-legislation-protect-new-yorkers-against-harmful) on Friday, according to the governor's office. One law prohibits the sale of kratom products to anyone under 21. The other requires warning labels on all kratom products sold, manufactured, or distributed in the state.

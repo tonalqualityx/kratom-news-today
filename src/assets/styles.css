@@ -1118,6 +1118,43 @@ hr {
   margin: var(--space-6) 0;
 }
 
+/* ===== Herba sponsor ad units (one brand identity; dark premium frame) ===== */
+.ad-slot .herba-ad { text-decoration:none; font-family:'Roboto', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif; }
+.herba-ad--rect { display:block; }
+.herba-ad--dark { background:#0d1911; color:#eef0ea; }
+.herba-ad__media { position:relative; display:flex; align-items:center; justify-content:center; background:radial-gradient(120% 130% at 50% 0%, #21422b 0%, #0a130d 70%); overflow:hidden; }
+.herba-ad__pic { max-width:86%; max-height:82%; width:auto; height:auto; object-fit:contain; filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
+.herba-ad__logo { position:absolute; top:10px; left:12px; width:104px; height:auto; z-index:1; filter:drop-shadow(0 1px 3px rgba(0,0,0,.6)); }
+.herba-ad__body { display:flex; flex-direction:column; gap:4px; padding:14px 16px 16px; }
+.herba-ad__kicker { font-size:.66rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#fad350; }
+.herba-ad__title { font-weight:700; line-height:1.2; color:#fff; font-size:1.05rem; }
+.herba-ad__meta { color:#aeb8af; font-size:.8rem; }
+.herba-ad__cta { align-self:flex-start; margin-top:10px; background:#fad350; color:#0d1911; font-weight:700; font-size:.82rem; padding:.5em 1em; border-radius:999px; transition:background .2s ease; }
+.herba-ad:hover .herba-ad__cta { background:#f3c333; }
+
+.herba-ad--rect .herba-ad__media { height:148px; }
+.herba-ad--banner { display:flex; align-items:stretch; min-height:230px; }
+.herba-ad--banner .herba-ad__media { width:40%; flex-shrink:0; }
+.herba-ad--banner .herba-ad__logo { width:120px; top:14px; left:16px; }
+.herba-ad--banner .herba-ad__body { flex:1; justify-content:center; padding:22px 30px; gap:8px; }
+.herba-ad--banner .herba-ad__title { font-size:1.5rem; }
+.herba-ad--banner .herba-ad__meta { font-size:.96rem; max-width:50ch; }
+.herba-ad--banner .herba-ad__cta { font-size:.9rem; padding:.6em 1.2em; }
+
+.herba-ad--feed { display:flex; gap:16px; align-items:center; background:var(--color-bg-alt); padding:14px 16px; }
+.herba-ad--feed .herba-ad__media { width:128px; height:92px; flex-shrink:0; border-radius:4px; }
+.herba-ad--feed .herba-ad__logo { display:none; }
+.herba-ad--feed .herba-ad__body { padding:0; gap:3px; }
+.herba-ad--feed .herba-ad__kicker { color:var(--color-accent); }
+.herba-ad--feed .herba-ad__title { color:var(--color-text); font-size:1.02rem; }
+.herba-ad--feed .herba-ad__meta { color:var(--color-text-secondary); }
+.herba-ad--feed .herba-ad__cta { margin-top:8px; font-size:.78rem; padding:.45em .9em; }
+
+@media (max-width:560px){
+  .herba-ad--banner { flex-direction:column; min-height:0; }
+  .herba-ad--banner .herba-ad__media { width:100%; height:150px; }
+}
+
 @media (max-width: 899px) {
   .ad-slot-header { display: none; }
 }

@@ -4,13 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7712NZX9CW"></script>
+  <!-- Google Analytics, deferred to first interaction (or a 4s fallback) so it stays off the critical path -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-7712NZX9CW');
+    (function () {
+      var id = 'G-7712NZX9CW', fired = false;
+      function load() {
+        if (fired) return; fired = true;
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { dataLayer.push(arguments); };
+        gtag('js', new Date());
+        gtag('config', id);
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+        document.head.appendChild(s);
+      }
+      var evts = ['scroll', 'pointerdown', 'keydown', 'touchstart'];
+      function go() { evts.forEach(function (e) { removeEventListener(e, go, { passive: true }); }); load(); }
+      evts.forEach(function (e) { addEventListener(e, go, { passive: true }); });
+      setTimeout(load, 4000);
+    })();
   </script>
 
   <title>{% if title %}{{ title }} — {{ site.title }}{% else %}{{ site.title }} — {{ site.tagline }}{% endif %}</title>

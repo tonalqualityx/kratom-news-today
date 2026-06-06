@@ -1,6 +1,10 @@
 const pluginRss = require("@11ty/eleventy-plugin-rss");
 const markdownIt = require("markdown-it");
 const markdownItAttrs = require("markdown-it-attrs");
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const esbuild = require("esbuild");
 
 module.exports = function (eleventyConfig) {
   // ---------------------------------------------------------------------------
@@ -206,6 +210,47 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addLayoutAlias("beat", "layouts/beat.njk");
   eleventyConfig.addLayoutAlias("archive", "layouts/archive.njk");
   eleventyConfig.addLayoutAlias("search", "layouts/search.njk");
+
+  // ---------------------------------------------------------------------------
+  // Asset pipeline: minify + content-hash CSS/JS, exposed via `asset.*`.
+  // Hashed filenames let static assets be cached far-future-immutable while a
+  // content change produces a new URL, busting the cache automatically.
+  // ---------------------------------------------------------------------------
+  const ASSET_ENTRIES = {
+    styles: "src/assets/styles.css",
+    nav: "src/assets/js/nav.js",
+    newsletter: "src/assets/js/newsletter.js",
+    share: "src/assets/js/share.js",
+    search: "src/assets/js/search.js",
+  };
+  const assetManifest = {};
+  eleventyConfig.addGlobalData("asset", () => assetManifest);
+
+  eleventyConfig.on("eleventy.before", async () => {
+    for (const k of Object.keys(assetManifest)) delete assetManifest[k];
+    for (const [key, src] of Object.entries(ASSET_ENTRIES)) {
+      const out = await esbuild.build({
+        entryPoints: [src], minify: true, bundle: false, write: false,
+        loader: { ".css": "css", ".js": "js" },
+      });
+      const code = out.outputFiles[0].text;
+      const hash = crypto.createHash("sha256").update(code).digest("hex").slice(0, 10);
+      const ext = path.extname(src);
+      const rel = (ext === ".js" ? "js/" : "") + path.basename(src, ext) + "." + hash + ext;
+      const dest = path.join("_site/assets", rel);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.writeFileSync(dest, code);
+      assetManifest[key] = "/assets/" + rel;
+    }
+  });
+
+  // Drop the raw, unminified copies that passthrough emits; keep only hashed.
+  eleventyConfig.on("eleventy.after", async () => {
+    for (const src of Object.values(ASSET_ENTRIES)) {
+      const raw = path.join("_site/assets", src.replace(/^src\/assets\//, ""));
+      if (fs.existsSync(raw)) fs.unlinkSync(raw);
+    }
+  });
 
   // ---------------------------------------------------------------------------
   // Passthrough copies

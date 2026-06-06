@@ -11,12 +11,15 @@
   "dependencies": {
     "@11ty/eleventy": "^3.0.0",
     "@11ty/eleventy-plugin-rss": "^2.0.2",
+    "gray-matter": "^4.0.3",
     "markdown-it": "^14.1.0",
     "markdown-it-attrs": "^4.2.0",
-    "gray-matter": "^4.0.3",
     "sharp": "^0.33.5"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
   }
 }

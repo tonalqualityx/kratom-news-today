@@ -12,6 +12,8 @@
     "@11ty/eleventy": "^3.0.0",
     "@11ty/eleventy-img": "^6.0.4",
     "@11ty/eleventy-plugin-rss": "^2.0.2",
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/source-serif-4": "^5.2.9",
     "gray-matter": "^4.0.3",
     "markdown-it": "^14.1.0",
     "markdown-it-attrs": "^4.2.0",

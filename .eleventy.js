@@ -245,11 +245,30 @@ module.exports = function (eleventyConfig) {
   });
 
   // Drop the raw, unminified copies that passthrough emits; keep only hashed.
+  // Also emit an .htaccess cache policy: hashed CSS/JS are immutable-forever,
+  // images/fonts get a month, HTML always revalidates.
   eleventyConfig.on("eleventy.after", async () => {
     for (const src of Object.values(ASSET_ENTRIES)) {
       const raw = path.join("_site/assets", src.replace(/^src\/assets\//, ""));
       if (fs.existsSync(raw)) fs.unlinkSync(raw);
     }
+    fs.writeFileSync(path.join("_site", ".htaccess"), [
+      "<IfModule mod_headers.c>",
+      "  # Content-hashed CSS/JS: safe to cache forever (a change yields a new filename)",
+      '  <FilesMatch "\\.[0-9a-f]{10}\\.(css|js)$">',
+      '    Header set Cache-Control "public, max-age=31536000, immutable"',
+      "  </FilesMatch>",
+      "  # Images & fonts (stable names): cache a month",
+      '  <FilesMatch "\\.(webp|jpe?g|png|gif|svg|ico|woff2?)$">',
+      '    Header set Cache-Control "public, max-age=2592000"',
+      "  </FilesMatch>",
+      "  # HTML: always revalidate so new deploys appear immediately",
+      '  <FilesMatch "\\.html$">',
+      '    Header set Cache-Control "public, max-age=0, must-revalidate"',
+      "  </FilesMatch>",
+      "</IfModule>",
+      "",
+    ].join("\n"));
   });
 
   // ---------------------------------------------------------------------------

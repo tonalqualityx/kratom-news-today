@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const esbuild = require("esbuild");
+const Image = require("@11ty/eleventy-img");
 
 module.exports = function (eleventyConfig) {
   // ---------------------------------------------------------------------------
@@ -252,6 +253,14 @@ module.exports = function (eleventyConfig) {
       const raw = path.join("_site/assets", src.replace(/^src\/assets\//, ""));
       if (fs.existsSync(raw)) fs.unlinkSync(raw);
     }
+    // Ship only the responsive variants; drop the full-size ad sources that
+    // passthrough copied into the output.
+    const adsDir = "_site/assets/ads";
+    if (fs.existsSync(adsDir)) {
+      for (const f of fs.readdirSync(adsDir)) {
+        if (/^herba-[a-z-]+\.webp$/.test(f)) fs.unlinkSync(path.join(adsDir, f));
+      }
+    }
     fs.writeFileSync(path.join("_site", ".htaccess"), [
       "<IfModule mod_headers.c>",
       "  # Content-hashed CSS/JS: safe to cache forever (a change yields a new filename)",
@@ -269,6 +278,25 @@ module.exports = function (eleventyConfig) {
       "</IfModule>",
       "",
     ].join("\n"));
+  });
+
+  // ---------------------------------------------------------------------------
+  // Responsive ad images: generate width variants + srcset at build time so a
+  // phone pulls a ~200px image instead of the full-size one. Source lives in
+  // src/assets/ads/<file>; variants are written hashed into _site/assets/ads/.
+  // ---------------------------------------------------------------------------
+  eleventyConfig.addNunjucksAsyncShortcode("adImg", async function (file, alt, opts) {
+    opts = opts || {};
+    const metadata = await Image(path.join("src/assets/ads", file), {
+      widths: opts.widths || [200, 400, 600, 900],
+      formats: ["webp"],
+      outputDir: "_site/assets/ads/",
+      urlPath: "/assets/ads/",
+    });
+    const attrs = { alt: alt || "", sizes: opts.sizes || "100vw", loading: opts.loading || "lazy", decoding: "async" };
+    if (opts.class) attrs.class = opts.class;
+    if (opts.fetchpriority) attrs.fetchpriority = opts.fetchpriority;
+    return Image.generateHTML(metadata, attrs);
   });
 
   // ---------------------------------------------------------------------------

@@ -23,6 +23,10 @@ KLAVIYO_API_KEY=$(python3 -c "import json; print(json.load(open('$KLAVIYO_CONFIG
 KLAVIYO_LIST_ID=$(python3 -c "import json; print(json.load(open('$KLAVIYO_CONFIG'))['listId'])" 2>/dev/null)
 KLAVIYO_TEMPLATE_ID=$(python3 -c "import json; print(json.load(open('$KLAVIYO_CONFIG'))['templateId'])" 2>/dev/null)
 
+# Daily campaign de-dupe: one email per day, no matter how many briefings land.
+KNT_STATE_DIR="/home/mike/.config/knt"
+CAMPAIGN_STATE_FILE="$KNT_STATE_DIR/last_campaign_date.txt"
+
 # --- Helpers ---
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
 
@@ -48,27 +52,52 @@ slack_notify_json() {
   fi
 }
 
+# Send ONE Klaviyo campaign containing every briefing published today.
+# Arg 1 is a JSON array: [{"title": "...", "summary": "...", "url": "..."}, ...]
+# The base template carries a single article block ({{ event.title|summary|url }});
+# we duplicate that block once per article so all briefings ride in one email.
 send_klaviyo_campaign() {
-  local title="$1" summary="$2" url="$3"
+  local articles_json="$1"
+
+  local count
+  count=$(python3 -c "import json,sys; print(len(json.loads(sys.argv[1])))" "$articles_json" 2>/dev/null || echo 0)
+  if [ "$count" -eq 0 ]; then
+    log "No articles to email, skipping Klaviyo campaign."
+    return
+  fi
+
   if [ -z "$KLAVIYO_API_KEY" ]; then
     log "WARN: Klaviyo API key not configured, skipping email campaign"
     return
   fi
 
-  log "Preparing Klaviyo campaign..."
+  # Duplicate prevention: only one campaign per calendar day.
+  local today
+  today=$(date +%Y-%m-%d)
+  if [ -f "$CAMPAIGN_STATE_FILE" ] && [ "$(cat "$CAMPAIGN_STATE_FILE" 2>/dev/null)" = "$today" ]; then
+    log "Klaviyo campaign already sent today ($today) — skipping to avoid a duplicate email."
+    return
+  fi
+
+  log "Preparing Klaviyo campaign with $count article(s)..."
 
   # Single Python script handles entire Klaviyo flow:
   # 1. Read base template (block-based, read-only)
-  # 2. Replace placeholders with briefing data
+  # 2. Duplicate the article block once per article and fill placeholders
   # 3. Create temp code-based template with populated HTML
   # 4. Create and send campaign using temp template
   # 5. Delete temp template
-  CAMPAIGN_RESULT=$(python3 - "$KLAVIYO_API_KEY" "$KLAVIYO_TEMPLATE_ID" "$KLAVIYO_LIST_ID" "$title" "$summary" "$url" << 'PYEOF'
-import json, urllib.request, sys, datetime
+  CAMPAIGN_RESULT=$(python3 - "$KLAVIYO_API_KEY" "$KLAVIYO_TEMPLATE_ID" "$KLAVIYO_LIST_ID" "$articles_json" << 'PYEOF'
+import json, urllib.request, sys, datetime, re
 
 api_key, base_template_id, list_id = sys.argv[1], sys.argv[2], sys.argv[3]
-title, summary, url = sys.argv[4], sys.argv[5], sys.argv[6]
+articles = json.loads(sys.argv[4])
 today = datetime.date.today().isoformat()
+
+n = len(articles)
+first_title = (articles[0].get("title") or "Kratom News Today") if articles else "Kratom News Today"
+subject = first_title if n == 1 else f"{first_title} (+{n - 1} more)"
+campaign_title = subject[:80]
 
 headers = {
     "Authorization": f"Klaviyo-API-Key {api_key}",
@@ -91,11 +120,29 @@ try:
     tmpl = api_call("GET", f"templates/{base_template_id}")
     html = tmpl["data"]["attributes"]["html"]
 
-    # 2. Replace placeholders (normalize whitespace from block editor line breaks)
-    import re
-    html = re.sub(r'\{\{\s*event\.title\s*\}\}', title, html)
-    html = re.sub(r'\{\{\s*event\.summary\s*\}\}', summary, html)
-    html = re.sub(r'\{\{\s*event\.url\s*\}\}', url, html)
+    # 2. Locate the single article block (the {{ event.* }} row) and duplicate it
+    #    once per article. Whitespace is tolerated inside the placeholders because
+    #    the block editor inserts line breaks. lambda replacements avoid treating
+    #    article text (e.g. a stray "\1") as a regex backreference.
+    block_re = re.compile(r'<tr><td style="color:#222222.*?</a></td></tr>', re.DOTALL)
+    m = block_re.search(html)
+    if not m:
+        print("ERROR: article block not found in template", file=sys.stderr)
+        print("FAIL")
+        sys.exit(0)
+    block = m.group(0)
+
+    def render(article):
+        h = block
+        h = re.sub(r'\{\{\s*event\.title\s*\}\}', lambda _: article.get("title", ""), h)
+        h = re.sub(r'\{\{\s*event\.summary\s*\}\}', lambda _: article.get("summary", ""), h)
+        h = re.sub(r'\{\{\s*event\.url\s*\}\}', lambda _: article.get("url", ""), h)
+        return h
+
+    separator = ('<tr><td style="padding:16px 0;">'
+                 '<hr style="border:none;border-top:1px solid #e0e0e0;margin:0;"></td></tr>')
+    combined = separator.join(render(a) for a in articles)
+    html = html[:m.start()] + combined + html[m.end():]
 
     # 3. Create temp code template
     temp_tmpl = api_call("POST", "templates/", {
@@ -116,7 +163,7 @@ try:
         "data": {
             "type": "campaign",
             "attributes": {
-                "name": f"Daily Briefing: {title[:80]}",
+                "name": f"Daily Briefing: {campaign_title}",
                 "audiences": {
                     "included": [list_id]
                 },
@@ -127,7 +174,7 @@ try:
                             "channel": "email",
                             "label": "Daily Briefing",
                             "content": {
-                                "subject": title,
+                                "subject": subject,
                                 "from_email": "briefing@kratomnewstoday.com",
                                 "from_label": "Kratom News Today"
                             }
@@ -201,15 +248,19 @@ PYEOF
   )
 
   if [ "$CAMPAIGN_RESULT" = "OK" ]; then
-    log "Klaviyo campaign sent successfully."
+    log "Klaviyo campaign sent successfully ($count article(s))."
+    # Mark today as sent so a re-run (e.g. retry/cron overlap) won't duplicate it.
+    mkdir -p "$KNT_STATE_DIR"
+    echo "$today" > "$CAMPAIGN_STATE_FILE"
   else
     log "WARN: Klaviyo campaign failed. Check log for details."
   fi
 }
 
-# Send Slack + Klaviyo notifications for a single published briefing slug.
-# Reads title / beat / TL;DR straight from the committed file — does NOT depend
+# Send a Slack notification for a single published briefing slug.
+# Reads title / beat straight from the committed file — does NOT depend
 # on Claude's JSON output, so it works even when the publish step was killed.
+# (Email is handled separately: one Klaviyo campaign for all of today's briefings.)
 notify_for_slug() {
   local slug="$1"
   local file
@@ -232,16 +283,12 @@ m = re.search(r'^tags:\s*\n((?:\s*-\s*.+\n?)+)', content, re.MULTILINE)
 if m:
     t = re.search(r'-\s*(.+)', m.group(1))
     beat = t.group(1).strip() if t else ''
-# The TL;DR is the `summary` frontmatter — single source of truth, also used
-# for the on-page callout, SEO meta, schema.org, OG image, and homepage cards.
-summary = fm('summary')
-print(json.dumps({'title': title, 'beat': beat, 'summary': summary}))
+print(json.dumps({'title': title, 'beat': beat}))
 PYEOF
 )
-  local title beat summary url
+  local title beat url
   title=$(echo "$meta" | python3 -c "import json,sys; print(json.load(sys.stdin)['title'])" 2>/dev/null)
   beat=$(echo "$meta" | python3 -c "import json,sys; print(json.load(sys.stdin)['beat'])" 2>/dev/null)
-  summary=$(echo "$meta" | python3 -c "import json,sys; print(json.load(sys.stdin)['summary'])" 2>/dev/null)
   url="$SITE_URL/briefings/$slug/"
 
   log "Notifying for: $title"
@@ -255,8 +302,32 @@ msg = '\n'.join(['📰 *KNT Daily Briefing Published*', '', f'<{url}|{title}>{be
 print(json.dumps({'channel': chan, 'text': msg, 'unfurl_links': False}))
 " "$title" "$beat" "$url" "$SLACK_CHANNEL" 2>/dev/null)
   slack_notify_json "$payload"
+}
 
-  send_klaviyo_campaign "$title" "$summary" "$url"
+# Extract one briefing's email fields (title, summary, url) as a JSON object.
+# Sourced from the committed file — the `summary` frontmatter is the TL;DR and
+# single source of truth (also used for the on-page callout, SEO meta,
+# schema.org, OG image, and homepage cards). Prints {} and returns 1 if the
+# file can't be found, so the caller can skip it.
+extract_article_data() {
+  local slug="$1"
+  local file
+  file=$(ls "$REPO_DIR/content/briefings/"*"$slug"*.md 2>/dev/null | head -1)
+  if [ -z "$file" ]; then
+    log "WARN: could not find briefing file for slug '$slug', skipping email entry"
+    echo "{}"
+    return 1
+  fi
+
+  python3 - "$file" "$SITE_URL/briefings/$slug/" << 'PYEOF'
+import sys, re, json
+content = open(sys.argv[1]).read()
+url = sys.argv[2]
+def fm(key):
+    m = re.search(r'^%s:\s*"?(.+?)"?\s*$' % key, content, re.MULTILINE)
+    return m.group(1).strip() if m else ''
+print(json.dumps({'title': fm('title'), 'summary': fm('summary'), 'url': url}))
+PYEOF
 }
 
 # --- Main ---
@@ -355,15 +426,28 @@ if [ -n "$(git log origin/main..HEAD --oneline 2>/dev/null)" ]; then
   }
 fi
 
-# Notify (Slack + Klaviyo) per published briefing, sourced from the committed files.
+# Notify Slack per published briefing, and collect every briefing's email data
+# so they all ride in a single Klaviyo campaign (one email per day, never one
+# per article). Sourced from the committed files.
+ARTICLES_JSON="[]"
 while IFS= read -r f; do
   [ -z "$f" ] && continue
   slug=$(python3 -c "import re,sys; c=open(sys.argv[1]).read(); m=re.search(r'^slug:\s*\"?(.+?)\"?\s*\$', c, re.M); print(m.group(1) if m else '')" "$f" 2>/dev/null)
   if [ -z "$slug" ]; then
     slug=$(basename "$f" .md | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//')
   fi
+
+  # Slack: one message per briefing.
   notify_for_slug "$slug"
+
+  # Email: append this briefing to the array (skip if its file can't be read).
+  if article=$(extract_article_data "$slug"); then
+    ARTICLES_JSON=$(python3 -c "import json,sys; arr=json.loads(sys.argv[1]); arr.append(json.loads(sys.argv[2])); print(json.dumps(arr))" "$ARTICLES_JSON" "$article")
+  fi
 done <<< "$PUBLISHED_FILES"
+
+# Email: ONE Klaviyo campaign carrying all of today's briefings.
+send_klaviyo_campaign "$ARTICLES_JSON"
 
 log "SUCCESS: published and notified."
 log "=== KNT Daily Publish finished ==="

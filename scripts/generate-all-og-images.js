@@ -2,20 +2,22 @@ const fs = require('fs');
 const path = require('path');
 const matter = require('gray-matter');
 
-const BRIEFINGS_DIR = path.join(__dirname, '..', 'content', 'briefings');
+const CONTENT_DIRS = [
+  path.join(__dirname, '..', 'content', 'briefings'),
+  path.join(__dirname, '..', 'content', 'reports'),
+];
 const OG_DIR = path.join(__dirname, '..', 'src', 'assets', 'og-images');
 const generateOgImage = path.join(__dirname, 'generate-og-image.js');
-
-if (!fs.existsSync(BRIEFINGS_DIR)) {
-  console.log('No briefings directory. Skipping OG image generation.');
-  process.exit(0);
-}
 
 if (!fs.existsSync(OG_DIR)) {
   fs.mkdirSync(OG_DIR, { recursive: true });
 }
 
-const files = fs.readdirSync(BRIEFINGS_DIR).filter(f => f.endsWith('.md'));
+const files = CONTENT_DIRS.flatMap(dir =>
+  fs.existsSync(dir)
+    ? fs.readdirSync(dir).filter(f => f.endsWith('.md')).map(f => path.join(dir, f))
+    : []
+);
 const BEAT_PRIORITY = ['regulation', 'business', 'science'];
 
 let generated = 0;
@@ -24,7 +26,7 @@ let skipped = 0;
 const { execFileSync } = require('child_process');
 
 files.forEach(file => {
-  const raw = fs.readFileSync(path.join(BRIEFINGS_DIR, file), 'utf8');
+  const raw = fs.readFileSync(file, 'utf8');
   let parsed;
   try {
     parsed = matter(raw);

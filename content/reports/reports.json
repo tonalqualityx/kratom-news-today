@@ -1,0 +1,4 @@
+{
+  "layout": "report",
+  "permalink": "/reports/{{ slug }}/index.html"
+}

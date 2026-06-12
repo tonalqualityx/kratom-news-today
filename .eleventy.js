@@ -80,6 +80,12 @@ module.exports = function (eleventyConfig) {
       .sort((a, b) => b.date - a.date);
   });
 
+  eleventyConfig.addCollection("reports", (collectionApi) => {
+    return collectionApi
+      .getFilteredByGlob("./content/reports/*.md")
+      .sort((a, b) => b.date - a.date);
+  });
+
   // ---------------------------------------------------------------------------
   // Shortcodes
   // ---------------------------------------------------------------------------
@@ -205,6 +211,7 @@ module.exports = function (eleventyConfig) {
   // Layout aliases — so frontmatter can use short names
   // ---------------------------------------------------------------------------
   eleventyConfig.addLayoutAlias("briefing", "layouts/briefing.njk");
+  eleventyConfig.addLayoutAlias("report", "layouts/report.njk");
   eleventyConfig.addLayoutAlias("opinion", "layouts/opinion.njk");
   eleventyConfig.addLayoutAlias("page", "layouts/page.njk");
   eleventyConfig.addLayoutAlias("home", "layouts/home.njk");
@@ -317,6 +324,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.ignores.add("drafts/**");
   eleventyConfig.ignores.add("agent-docs/**");
   eleventyConfig.ignores.add("knt-herald/**");
+  eleventyConfig.ignores.add("lurker/**");
   eleventyConfig.ignores.add("README.md");
   eleventyConfig.ignores.add("research.md");
   eleventyConfig.ignores.add("voice.md");

@@ -1,0 +1,30 @@
+---
+layout: layouts/base.njk
+title: Reports
+description: "In-depth reports from Kratom News Today: comprehensive, sourced analysis of the kratom industry's regulatory, business, and scientific landscape."
+permalink: /reports/index.html
+---
+
+{% block content %}
+<header class="archive-header">
+  <h1>Reports</h1>
+  <p>In-depth, fully sourced analysis of where the kratom industry stands. Longer than a daily briefing, updated as the landscape changes.</p>
+</header>
+
+<div class="archive-content">
+  {% for post in collections.reports %}
+  <article class="archive-item">
+    <span class="beat-label beat-regulation">Report</span>
+    <h3><a href="{{ post.url }}">{{ post.data.title }}</a></h3>
+    <time datetime="{{ post.date | dateISO }}">{{ post.date | dateFormat }}</time>
+    {% if post.data.summary %}
+    <p>{{ post.data.summary | truncate(220) }}</p>
+    {% endif %}
+  </article>
+  {% endfor %}
+
+  {% if not collections.reports or collections.reports.length == 0 %}
+  <p class="empty-state">No reports published yet. Check back soon.</p>
+  {% endif %}
+</div>
+{% endblock %}

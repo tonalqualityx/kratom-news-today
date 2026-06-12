@@ -1,0 +1,116 @@
+---
+layout: layouts/base.njk
+---
+
+{% block head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ title }}",
+  "description": "{{ summary }}",
+  "image": "{{ site.url }}/assets/og-images/{{ slug }}.png",
+  "datePublished": "{{ date | dateISO }}",
+  "dateModified": "{{ date_modified | dateISO if date_modified else date | dateISO }}",
+  "author": {
+    "@type": "Person",
+    "name": "Mike Dion",
+    "jobTitle": "Managing Editor",
+    "url": "{{ site.url }}/about/"
+  },
+  "editor": {
+    "@type": "Person",
+    "name": "Mike Dion",
+    "jobTitle": "Managing Editor",
+    "url": "{{ site.url }}/about/"
+  },
+  "publisher": {
+    "@type": "NewsMediaOrganization",
+    "name": "{{ site.title }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ site.url }}/assets/logo.svg"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ site.url }}{{ page.url }}"
+  },
+  "articleSection": "Reports",
+  "keywords": "{{ tags | join(', ') }}"{% if sources %},
+  "citation": [
+    {% for source in sources %}
+    {
+      "@type": "CreativeWork",
+      "name": "{{ source.title }}",
+      "url": "{{ source.url }}",
+      "publisher": "{{ source.publisher }}"{% if source.published %},
+      "datePublished": "{{ source.published }}"{% endif %}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]{% endif %}
+}
+</script>
+
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site.url }}/"},
+      {"@type": "ListItem", "position": 2, "name": "Reports", "item": "{{ site.url }}/reports/"},
+      {"@type": "ListItem", "position": 3, "name": "{{ title }}", "item": "{{ site.url }}{{ page.url }}"}
+    ]
+  }
+  </script>
+  <ol class="breadcrumb-list">
+    <li><a href="/">Home</a></li>
+    <li><a href="/reports/">Reports</a></li>
+    <li aria-current="page">{{ title }}</li>
+  </ol>
+  <a href="/reports/" class="breadcrumb-back">&larr; Back to Reports</a>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="briefing-layout">
+  <article class="briefing report">
+    <header class="briefing-header">
+      <h1 class="briefing-title">{{ title }}</h1>
+      <div class="article-meta">
+        <a href="/reports/" class="beat-label beat-regulation">Report</a>
+        <time datetime="{{ date | dateISO }}">{{ date | dateFormat }}</time>
+        <span class="byline">{{ site.author }}</span>
+        <span class="reading-time">{{ content | readingTime }}</span>
+      </div>
+      <div class="article-meta-editor">
+        Edited by <a href="/about/">Mike Dion</a>
+      </div>
+    </header>
+
+    {% include "components/tldr.njk" %}
+
+    <div class="briefing-body">
+      {{ content | safe }}
+    </div>
+
+    {% include "components/share-buttons.njk" %}
+
+    {% include "components/ad-end-of-article.njk" %}
+
+    {% include "components/sources.njk" %}
+
+    {% include "components/related-coverage.njk" %}
+  </article>
+
+  <aside class="briefing-sidebar">
+    {% include "components/newsletter-signup.njk" %}
+    {% include "components/ad-sidebar.njk" %}
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ asset.share }}" defer></script>
+{% endblock %}

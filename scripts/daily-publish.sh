@@ -360,7 +360,11 @@ PUBLISH_PROMPT="You are running the KNT daily publishing workflow. Follow these 
 
 3. After push, output ONLY a JSON object on the last line:
    {\"status\":\"success\",\"slugs\":[\"the-slug\"]}
-   If anything fails, output: {\"status\":\"error\",\"message\":\"what went wrong\"}
+   If Herald's triage legitimately finds no publishable new development (a real
+   no-news day, NOT a technical failure), skip synthesis/publish and output:
+   {\"status\":\"no_news\",\"message\":\"why nothing was publishable\"}
+   If anything fails technically (research crashed, build error, push rejected),
+   output: {\"status\":\"error\",\"message\":\"what went wrong\"}
 
 Do not ask questions. Do not wait for input. Do NOT start a dev server or any
 long-running foreground process. Execute the full pipeline and exit."
@@ -368,14 +372,20 @@ long-running foreground process. Execute the full pipeline and exit."
 # Run the publish step under a hard wall-clock timeout. timeout sends SIGTERM at
 # the limit, then SIGKILL 30s later if it's still alive — so a hung Claude can no
 # longer block the script (and the notifications) forever.
+# Each attempt's output is captured separately (then appended to the log) so the
+# loop can inspect the pipeline's status JSON for a declared no-news day.
+ATTEMPT_OUT=$(mktemp)
+trap 'rm -f "$ATTEMPT_OUT"' EXIT
+
 run_publish() {
   set +e
   timeout -k 30 "$PUBLISH_TIMEOUT" claude -p \
     --dangerously-skip-permissions \
     --max-budget-usd 5.00 \
-    "$PUBLISH_PROMPT" >> "$LOG_FILE" 2>&1
+    "$PUBLISH_PROMPT" > "$ATTEMPT_OUT" 2>&1
   local rc=$?
   set -e
+  cat "$ATTEMPT_OUT" >> "$LOG_FILE"
   return "$rc"
 }
 
@@ -385,6 +395,7 @@ new_briefings() {
 }
 
 PUBLISHED_FILES=""
+NO_NEWS=0
 attempt=1
 while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
   log "Running Herald research + publish pipeline (attempt $attempt/$MAX_ATTEMPTS, timeout ${PUBLISH_TIMEOUT}s)..."
@@ -405,12 +416,27 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
     break
   fi
 
+  # A clean exit that declared a no-news day is a valid outcome, not a failure.
+  # Don't burn a retry re-running the same research against the same window.
+  if [ "$rc" -eq 0 ] && grep -q '"status"[[:space:]]*:[[:space:]]*"no_news"' "$ATTEMPT_OUT"; then
+    NO_NEWS=1
+    log "No-news day declared by Herald triage. Skipping retry."
+    break
+  fi
+
   log "No new briefing detected after attempt $attempt."
   attempt=$((attempt + 1))
 done
 
-# Nothing published after all attempts → loud failure, no silent exit.
+# Nothing published: a declared no-news day exits clean; anything else is a
+# loud failure, no silent exit.
 if [ -z "$PUBLISHED_FILES" ]; then
+  if [ "$NO_NEWS" -eq 1 ]; then
+    log "NO NEWS: Herald found no verifiable new development in the window. Exiting cleanly."
+    slack_notify "🟢 KNT: no briefing today. Herald triage found no verifiable new development in the 24h window, so it skipped publishing per the no-padding rule. No action needed."
+    log "=== KNT Daily Publish finished (no-news day) ==="
+    exit 0
+  fi
   log "ERROR: no briefing published after $MAX_ATTEMPTS attempt(s)."
   slack_notify "⚠ KNT daily publish FAILED: no briefing published after $MAX_ATTEMPTS attempt(s). Check $LOG_FILE"
   exit 1

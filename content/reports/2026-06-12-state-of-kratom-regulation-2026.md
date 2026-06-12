@@ -5,6 +5,11 @@ date: 2026-06-12
 generated_at: "2026-06-12T13:30:00Z"
 type: report
 summary: "As of June 2026, seven states ban kratom outright and Tennessee becomes the eighth on July 1, while 30 states and the District of Columbia regulate the plant in some form, according to the Legislative Analysis and Public Policy Association. The FDA has recommended that the DEA schedule concentrated 7-hydroxymitragynine products while explicitly distinguishing them from natural leaf kratom, and the DEA's review remains pending. This report maps the federal posture, the state patchwork, the courts, and the enforcement wave reshaping the United States kratom market at midyear."
+report_number: "KNT-R-2026-01"
+dataset:
+  name: "State Kratom Regulatory Status and 2026 Actions, Midyear 2026"
+  description: "State-by-state table of United States kratom regulatory status and 2026 actions documented in The State of Kratom Regulation: 2026 Midyear Report. Covers 32 states with a status category, dated status summary, and primary source URL per row. Current as of June 12, 2026."
+  csv_path: "/assets/data/state-of-kratom-regulation-2026.csv"
 tags:
   - regulation
 entities:
@@ -239,6 +244,18 @@ Halfway through 2026, kratom regulation in the United States has reached its mos
 
 This report maps the regulatory landscape as it stands on June 12, 2026: the federal posture, the dividing line between leaf and 7-OH, the ban states, the regulated middle, the courts, the enforcement wave, and the data driving all of it.
 
+## Key Numbers at Midyear
+
+- **7 states** ban kratom outright today; **Tennessee makes 8 on July 1**.
+- **30 states and the District of Columbia** regulate kratom in some form, per the Legislative Analysis and Public Policy Association (January 2026).
+- **1 state**, Rhode Island, has reversed a ban, the first in the nation to move from prohibition back to a regulated market.
+- **A roughly 1,200 percent increase** in kratom-related poison center calls from 2015 to 2025, per CDC surveillance.
+- **22 entities** are under civil investigative demand in Missouri's attorney general probe, the broadest state enforcement action to date.
+- **95 percent retail compliance** and more than **$5 million in products seized** under California's enforcement program, without a kratom statute on the books.
+- **Two federal deadlines inside three weeks:** Florida's emergency 7-OH order expires June 30, and Tennessee's ban, Georgia's restrictions, and Idaho Falls' local ban all take effect July 1.
+
+The state-by-state table behind this report is available as a downloadable dataset: [state-of-kratom-regulation-2026.csv](/assets/data/state-of-kratom-regulation-2026.csv). It covers the 32 states with a regulatory status or 2026 action documented in sourced reporting, with a primary source for every row. See the [methodology](#methodology) below.
+
 ## The Federal Picture: A Recommendation, Not a Rule
 
 Kratom remains unscheduled under the federal Controlled Substances Act. The only direct federal scheduling attempt, the DEA's 2016 move to place mitragynine and 7-hydroxymitragynine in Schedule I, was [withdrawn after an unusually large volume of public comments](https://www.federalregister.gov/documents/2016/08/31/2016-20803/schedules-of-controlled-substances-temporary-placement-of-mitragynine-and-7-hydroxymitragynine-into). That status quo held for nearly a decade. It is now under more pressure than at any point since.
@@ -321,3 +338,31 @@ The research picture is mixed. The same month the AMA took up a resolution to re
 - **California's AB 1088 and North Carolina's July licensing deadline**, the two largest pending state frameworks.
 
 The pattern across all of it is consistent. Federal policy remains unsettled, and the states are answering the same question in different ways: where is the line between natural leaf kratom and the concentrated 7-OH derivatives that regulators increasingly treat as a novel opioid? In 2026, nearly every legislature, agency, and courtroom touching kratom is answering some version of that question. The answers, so far, do not match.
+
+<a id="methodology"></a>
+
+## Methodology
+
+**Scope and window.** This report covers federal, state, and notable local kratom regulatory activity in the United States through June 12, 2026. It is the first edition in a continuing series; a year-end 2026 edition is planned.
+
+**Sources.** Claims are sourced to primary documents wherever they exist: statutes and bill texts, agency announcements (FDA, DEA, NIH, CDC, state health departments), attorney general releases, court records, and the Federal Register. Aggregate state counts (the "30 states and DC" baseline and the roster of pre-2026 ban states) come from the Legislative Analysis and Public Policy Association's January 2026 summary of state laws, supplemented by the Rockefeller Institute of Government's policy survey. Where reporting from other outlets is the source, the outlet is named in the text. The full source list appears at the end of this page.
+
+**The dataset.** The downloadable table ([CSV](/assets/data/state-of-kratom-regulation-2026.csv)) lists each state with a regulatory status or 2026 action documented in this report's sourcing: 32 states as of this edition. Each row carries a status category, a dated summary, and a primary source URL. States absent from the table had no documented 2026 activity in our sourcing; their baseline status is covered by the LAPPA summary linked above. Status categories (full ban, regulated framework, 7-OH-specific restriction, enforcement activity, pending legislation, local action) describe the dominant documented posture and are assigned by the editor.
+
+**Production and corrections.** Kratom News Today reports are produced through the AI-assisted editorial workflow described in our [editorial policy](/editorial-policy/), with review and final responsibility by the Managing Editor. Errors are corrected per our [corrections policy](/corrections/), and material corrections to this report will be noted on this page.
+
+**Updates.** This page's URL is permanent. The report text reflects June 12, 2026; if states act between editions, updates appear in our daily [regulation coverage](/regulation/) and are folded into the next edition.
+
+<a id="cite"></a>
+
+## How to Cite This Report
+
+> Kratom News Today. *The State of Kratom Regulation: 2026 Midyear Report.* Report no. KNT-R-2026-01. Kratom News Today, June 12, 2026. https://kratomnewstoday.com/reports/state-of-kratom-regulation-2026/.
+
+The report and dataset may be quoted and reused with attribution to Kratom News Today and a link to this page. Journalists on deadline can reach the editor through the [contact page](/contact/) for state-specific status checks or comment.
+
+<a id="about"></a>
+
+## About This Report
+
+*The State of Kratom Regulation* is researched and written by Kratom News Today, a trade publication covering kratom regulation, business, and science. The Managing Editor is [Mike Dion](/about/). Kratom News Today is published by Herba Releaf; we disclose this relationship prominently, and our [editorial policy](/editorial-policy/) governs how we cover the publisher and every other industry company: no preferential treatment, no protection from unfavorable coverage. Editorial content on this site never links to commercial pages.

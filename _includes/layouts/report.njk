@@ -52,6 +52,34 @@ layout: layouts/base.njk
 }
 </script>
 
+{% if dataset %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "{{ dataset.name }}",
+  "description": "{{ dataset.description }}",
+  "url": "{{ site.url }}{{ page.url }}",
+  "sameAs": "{{ site.url }}{{ page.url }}",
+  "datePublished": "{{ date | dateISO }}",
+  "creator": {
+    "@type": "NewsMediaOrganization",
+    "name": "{{ site.title }}",
+    "url": "{{ site.url }}"
+  },
+  "license": "{{ site.url }}/reports/{{ slug }}/#cite",
+  "isAccessibleForFree": true,
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "{{ site.url }}{{ dataset.csv_path }}"
+    }
+  ]
+}
+</script>
+{% endif %}
+
 <nav class="breadcrumbs" aria-label="Breadcrumb">
   <script type="application/ld+json">
   {

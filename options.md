@@ -2,7 +2,7 @@
 
 ```yaml
 perplexity_model: sonar-pro
-research_time_window_hours: 24
+research_time_window_hours: 72
 source_count_target: 8
 max_check_iterations: 3
 voice_check_failure_behavior: send-for-revision
@@ -24,7 +24,9 @@ compliance_check_failure_behavior: halt-and-report
 
 ## Notes
 
-**On Perplexity model choice:** This project uses `sonar-pro` rather than the default `sonar`. Kratom industry coverage benefits from the deeper synthesis sonar-pro provides — the regulatory landscape is complex enough that the cheaper model produces shallower findings. The cost difference is modest at one briefing per day; the quality difference is meaningful.
+**On Perplexity model choice:** This project uses `sonar-pro` rather than the default `sonar`. Kratom industry coverage benefits from the deeper synthesis sonar-pro provides. The regulatory landscape is complex enough that the cheaper model produces shallower findings. The cost difference is modest at one briefing per day; the quality difference is meaningful.
+
+**On the research window (72 hours):** Raised from 24h on 2026-06-14. Kratom regulatory and court news is frequently indexed a day or two after it happens (state press releases, court filings, and local reporting lag), so a 24h window was rejecting real developments whose coverage had not yet surfaced. The window is now enforced as a true publication-date filter at the Perplexity API level (`search_after_date_filter`), so widening it catches lagged-but-real stories without pulling in stale items dressed as fresh. Triage still dedupes against prior coverage via the vector index, so the wider window does not produce repeat briefings.
 
 **On voice and rules check failure behavior:** Both are set to `send-for-revision`. This project auto-publishes, so we want the synthesis agent to revise its own work on voice and rules issues rather than halting. Compliance check is the safety net that halts when something serious slips through.
 

@@ -3,6 +3,11 @@ name: Build and Deploy
 on:
   push:
     branches: [main]
+  schedule:
+    # Daily safety rebuild at 15:00 UTC (~11am ET), after the 8am ET publish run.
+    # The Google News sitemap is date-windowed at build time (isRecentDays), so on
+    # a no-news day with no commit the site must still rebuild to keep it current.
+    - cron: '0 15 * * *'
   workflow_dispatch:
 
 jobs:

@@ -204,6 +204,16 @@ sources:
     publisher: "U.S. Attorney's Office, Central District of California"
     published: "2026-05-26"
     excerpt: "Federal seizure of kratom products in the Central District of California."
+  - title: "SB25-072 Regulation of Kratom (Daniel Bregger Act)"
+    url: "https://leg.colorado.gov/bills/sb25-072"
+    publisher: "Colorado General Assembly"
+    published: "2025-05-29"
+    excerpt: "Colorado's 2025 kratom law caps 7-OH at 2 percent of total alkaloid content, bans synthetic and semi-synthetic kratom, and sets a 21-and-older age limit."
+  - title: "House Bill 1077, Mississippi Kratom Consumer Protection Act (As Sent to Governor)"
+    url: "https://billstatus.ls.state.ms.us/documents/2025/html/HB/1000-1099/HB1077SG.htm"
+    publisher: "Mississippi Legislature"
+    published: "2025-04-24"
+    excerpt: "Mississippi's 2025 KCPA prohibits kratom products containing more than 1 percent 7-OH, requires behind-the-counter placement, sets a 21-and-older age limit, and adds an excise tax."
 related_briefings:
   - "fda-recommends-scheduling-7oh-kansas-signs-ban"
   - "senators-push-full-kratom-scheduling-states-crack-down"
@@ -273,6 +283,8 @@ Two other federal developments cut in different directions. The NIH [cleared the
 Nearly every significant regulatory action this year draws the same distinction the FDA drew: natural kratom leaf on one side, concentrated or synthetic 7-hydroxymitragynine on the other. 7-OH occurs in trace amounts in raw leaf. The products driving regulatory attention contain the alkaloid at concentrations far above what occurs naturally, in many cases through chemical conversion of mitragynine.
 
 States have operationalized the distinction in different ways. Ohio's [permanent rule banning synthetic kratom products][ohio-synthetic-kratom-ban-takes-effect] took effect in May after clearing the legislature's rule-review committee, replacing an emergency rule, while the state's Board of Pharmacy has weighed whether restrictions should extend to natural leaf, according to the Statehouse News Bureau. Kansas Governor Laura Kelly [signed House Bill 2365][kansas-signs-7-oh-ban-washington-weighs-kratom-tax], a 7-OH scheduling measure, [per the governor's office](https://www.governor.ks.gov/Home/Components/News/News/1016/55). The New Hampshire House [passed Senate Bill 557][new-hampshire-kratom-bill-missouri-ag-expands-probe], targeting enhanced 7-OH products. New York's legislature [unanimously passed the Synthetic Kratom Kills Act][new-york-legislature-passes-synthetic-kratom-7oh-ban] in June, a bill that would prohibit lab-produced 7-OH products while preserving the natural leaf market; it awaits Governor Kathy Hochul's signature.
+
+The cap-based version of this approach predates the 2026 wave. Colorado and Mississippi both wrote explicit 7-OH ceilings into Kratom Consumer Protection Act statutes in 2025. Colorado's Senate Bill 25-072, the Daniel Bregger Act, caps 7-OH at 2 percent of total alkaloid content, bans the manufacture and distribution of synthetic and semi-synthetic kratom, and restricts sales to adults 21 and older, [according to the Colorado General Assembly](https://leg.colorado.gov/bills/sb25-072). Mississippi's House Bill 1077, [signed by Governor Tate Reeves in April 2025 and effective that July](https://billstatus.ls.state.ms.us/documents/2025/html/HB/1000-1099/HB1077SG.htm), set a tighter ceiling, prohibiting kratom products that contain more than 1 percent 7-OH, and added behind-the-counter placement, a 21-and-older age limit, and an excise tax.
 
 The industry's main advocacy organizations have largely endorsed the split. The American Kratom Association [issued a policy advisory urging state attorneys general to enforce existing law against 7-OH products][aka-urges-ag-enforcement-7oh-florida-ban-expiry], and the Global Kratom Coalition has published [its own statement distinguishing 7-OH products from leaf kratom](https://globalkratomcoalition.org/statement-on-7-hydroxymitragynine-products). Manufacturers have responded to the patchwork commercially as well: the Philadelphia Inquirer [reported that kratom companies are reformulating 7-OH products][utah-kratom-act-takes-effect-manufacturers-reformulate] to sidestep pending state bans.
 

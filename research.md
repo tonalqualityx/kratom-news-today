@@ -2,7 +2,7 @@
 
 ## Topic
 
-Kratom News Today covers the kratom industry across three beats: regulation, business, and science. The publication monitors developments affecting kratom — Mitragyna speciosa and its alkaloids — including federal regulatory action, state-level legislation, court decisions, enforcement activity, business news affecting manufacturers and retailers, scientific research, and harm-reduction discourse.
+Kratom and its alkaloids (Mitragyna speciosa, mitragynine, and 7-hydroxymitragynine) and the regulation, business, and science surrounding them, including federal regulatory action, state-level legislation, court decisions, enforcement activity, business news affecting manufacturers and retailers, scientific research, and harm-reduction discourse.
 
 Particular areas of attention:
 

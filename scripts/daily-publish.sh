@@ -9,7 +9,9 @@ LOG_DIR="/home/mike/.local/log"
 LOG_FILE="$LOG_DIR/knt-herald-$(date +%Y-%m-%d).log"
 SLACK_CHANNEL="C0AEBQ36W05"  # #bast-chat
 SITE_URL="https://kratomnewstoday.com"
-PUBLISH_TIMEOUT=1200   # max seconds for the claude publish step before we kill it (20 min)
+PUBLISH_TIMEOUT=1200   # hard wall-clock cap for the claude publish step (20 min)
+PUBLISH_STALL_LIMIT=600 # kill early if the run emits no output for this long (true hang).
+                        # Must exceed the longest legitimate quiet stretch (research ~6 min).
 MAX_ATTEMPTS=2         # how many times to attempt publish if no briefing lands
 
 mkdir -p "$LOG_DIR"
@@ -377,15 +379,55 @@ long-running foreground process. Execute the full pipeline and exit."
 ATTEMPT_OUT=$(mktemp)
 trap 'rm -f "$ATTEMPT_OUT"' EXIT
 
+# Run the publish step under TWO guards: a hard wall-clock cap (PUBLISH_TIMEOUT)
+# and a no-progress stall detector (PUBLISH_STALL_LIMIT). --verbose makes the
+# headless run stream its step-by-step progress to ATTEMPT_OUT, so (a) a hung run
+# still leaves a transcript of the last step before it stalled, and (b) the stall
+# detector can tell "slow but working" (output still growing) from "truly hung"
+# (output frozen). Success detection downstream is git-based, not parsed from this
+# output, so --verbose does not affect it. Sets LAST_ATTEMPT_REASON for the caller.
+LAST_ATTEMPT_REASON=""
 run_publish() {
   set +e
-  timeout -k 30 "$PUBLISH_TIMEOUT" claude -p \
+  : > "$ATTEMPT_OUT"
+  claude -p \
     --dangerously-skip-permissions \
+    --verbose \
     --max-budget-usd 5.00 \
-    "$PUBLISH_PROMPT" > "$ATTEMPT_OUT" 2>&1
-  local rc=$?
+    "$PUBLISH_PROMPT" > "$ATTEMPT_OUT" 2>&1 &
+  local cpid=$!
+
+  local waited=0 reason="" rc=0
+  while kill -0 "$cpid" 2>/dev/null; do
+    sleep 15
+    waited=$((waited + 15))
+    if [ "$waited" -ge "$PUBLISH_TIMEOUT" ]; then
+      reason="timeout"; break
+    fi
+    local now mtime age
+    now=$(date +%s)
+    mtime=$(stat -c %Y "$ATTEMPT_OUT" 2>/dev/null || echo "$now")
+    age=$((now - mtime))
+    if [ "$age" -ge "$PUBLISH_STALL_LIMIT" ]; then
+      reason="stall"; break
+    fi
+  done
+
+  if [ -n "$reason" ]; then
+    # Kill the whole claude process tree (children first), escalate if needed.
+    pkill -TERM -P "$cpid" 2>/dev/null
+    kill  -TERM "$cpid" 2>/dev/null
+    sleep 5
+    pkill -KILL -P "$cpid" 2>/dev/null
+    kill  -KILL "$cpid" 2>/dev/null
+    wait "$cpid" 2>/dev/null
+    rc=124; [ "$reason" = "stall" ] && rc=125
+  else
+    wait "$cpid"; rc=$?
+  fi
   set -e
   cat "$ATTEMPT_OUT" >> "$LOG_FILE"
+  LAST_ATTEMPT_REASON="$reason"
   return "$rc"
 }
 
@@ -401,7 +443,9 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
   log "Running Herald research + publish pipeline (attempt $attempt/$MAX_ATTEMPTS, timeout ${PUBLISH_TIMEOUT}s)..."
   rc=0; run_publish || rc=$?
   if [ "$rc" -eq 124 ]; then
-    log "WARN: publish step hit the ${PUBLISH_TIMEOUT}s timeout and was killed."
+    log "WARN: publish step hit the ${PUBLISH_TIMEOUT}s hard timeout and was killed."
+  elif [ "$rc" -eq 125 ]; then
+    log "WARN: publish step stalled (no output for ${PUBLISH_STALL_LIMIT}s) and was killed."
   elif [ "$rc" -ne 0 ]; then
     log "WARN: publish step exited non-zero (rc=$rc)."
   else
@@ -438,7 +482,10 @@ if [ -z "$PUBLISHED_FILES" ]; then
     exit 0
   fi
   log "ERROR: no briefing published after $MAX_ATTEMPTS attempt(s)."
-  slack_notify "⚠ KNT daily publish FAILED: no briefing published after $MAX_ATTEMPTS attempt(s). Check $LOG_FILE"
+  # Include the tail of the last attempt's transcript and how it ended so the
+  # failure can be triaged from the Slack alert without opening the log.
+  FAIL_TAIL=$(tail -n 15 "$ATTEMPT_OUT" 2>/dev/null | tr '\n' ' ' | tr -s ' ' | cut -c1-500)
+  slack_notify "⚠ KNT daily publish FAILED: no briefing after $MAX_ATTEMPTS attempt(s) (last attempt ended: ${LAST_ATTEMPT_REASON:-clean-no-output}). Last log: ${FAIL_TAIL:-<empty>} — full log: $LOG_FILE"
   exit 1
 fi
 

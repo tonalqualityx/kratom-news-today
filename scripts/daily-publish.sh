@@ -10,8 +10,11 @@ LOG_FILE="$LOG_DIR/knt-herald-$(date +%Y-%m-%d).log"
 SLACK_CHANNEL="C0AEBQ36W05"  # #bast-chat
 SITE_URL="https://kratomnewstoday.com"
 PUBLISH_TIMEOUT=1200   # hard wall-clock cap for the claude publish step (20 min)
-PUBLISH_STALL_LIMIT=600 # kill early if the run emits no output for this long (true hang).
-                        # Must exceed the longest legitimate quiet stretch (research ~6 min).
+PUBLISH_STALL_LIMIT=900 # kill early if the run emits no output for this long (true hang).
+                        # Must exceed the longest legitimate quiet stretch: the research phase is
+                        # one silent Python call that runs ~600-670s with the current queries, so
+                        # 600 was too tight and killed runs mid-research. 900 clears research with
+                        # margin and still catches a real synthesis hang before the 1200s wall.
 MAX_ATTEMPTS=2         # how many times to attempt publish if no briefing lands
 
 mkdir -p "$LOG_DIR"

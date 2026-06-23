@@ -9,12 +9,9 @@ LOG_DIR="/home/mike/.local/log"
 LOG_FILE="$LOG_DIR/knt-herald-$(date +%Y-%m-%d).log"
 SLACK_CHANNEL="C0AEBQ36W05"  # #bast-chat
 SITE_URL="https://kratomnewstoday.com"
-PUBLISH_TIMEOUT=1200   # hard wall-clock cap for the claude publish step (20 min)
-PUBLISH_STALL_LIMIT=900 # kill early if the run emits no output for this long (true hang).
-                        # Must exceed the longest legitimate quiet stretch: the research phase is
-                        # one silent Python call that runs ~600-670s with the current queries, so
-                        # 600 was too tight and killed runs mid-research. 900 clears research with
-                        # margin and still catches a real synthesis hang before the 1200s wall.
+PUBLISH_TIMEOUT=1800   # hard wall-clock cap for the claude publish step (30 min).
+                        # Research alone now runs ~550-650s with the current queries, so the wall
+                        # is generous to leave synthesis + publish room under a single attempt.
 MAX_ATTEMPTS=2         # how many times to attempt publish if no briefing lands
 
 mkdir -p "$LOG_DIR"
@@ -382,55 +379,31 @@ long-running foreground process. Execute the full pipeline and exit."
 ATTEMPT_OUT=$(mktemp)
 trap 'rm -f "$ATTEMPT_OUT"' EXIT
 
-# Run the publish step under TWO guards: a hard wall-clock cap (PUBLISH_TIMEOUT)
-# and a no-progress stall detector (PUBLISH_STALL_LIMIT). --verbose makes the
-# headless run stream its step-by-step progress to ATTEMPT_OUT, so (a) a hung run
-# still leaves a transcript of the last step before it stalled, and (b) the stall
-# detector can tell "slow but working" (output still growing) from "truly hung"
-# (output frozen). Success detection downstream is git-based, not parsed from this
-# output, so --verbose does not affect it. Sets LAST_ATTEMPT_REASON for the caller.
+# Run the publish step under a single hard wall-clock cap. `timeout` SIGTERMs at
+# the limit, then SIGKILLs 30s later, so a hung claude can't block forever.
+#
+# NOTE: an earlier no-progress stall detector (watch ATTEMPT_OUT's mtime, kill if
+# it stops growing) was removed because it cannot work here: `claude -p` buffers
+# its output when redirected to a file, so the file stays empty until the run
+# ends. The detector therefore saw "no output" the entire run and fired at its
+# threshold regardless of whether the agent was working -- it killed two days of
+# otherwise-healthy runs mid-pipeline. The real hang fix is upstream (clean
+# queries + de-noised findings); this hard wall is the only backstop we need.
+# --verbose still lands the full transcript in the log on exit.
 LAST_ATTEMPT_REASON=""
 run_publish() {
   set +e
   : > "$ATTEMPT_OUT"
-  claude -p \
+  timeout -k 30 "$PUBLISH_TIMEOUT" claude -p \
     --dangerously-skip-permissions \
     --verbose \
     --max-budget-usd 5.00 \
-    "$PUBLISH_PROMPT" > "$ATTEMPT_OUT" 2>&1 &
-  local cpid=$!
-
-  local waited=0 reason="" rc=0
-  while kill -0 "$cpid" 2>/dev/null; do
-    sleep 15
-    waited=$((waited + 15))
-    if [ "$waited" -ge "$PUBLISH_TIMEOUT" ]; then
-      reason="timeout"; break
-    fi
-    local now mtime age
-    now=$(date +%s)
-    mtime=$(stat -c %Y "$ATTEMPT_OUT" 2>/dev/null || echo "$now")
-    age=$((now - mtime))
-    if [ "$age" -ge "$PUBLISH_STALL_LIMIT" ]; then
-      reason="stall"; break
-    fi
-  done
-
-  if [ -n "$reason" ]; then
-    # Kill the whole claude process tree (children first), escalate if needed.
-    pkill -TERM -P "$cpid" 2>/dev/null
-    kill  -TERM "$cpid" 2>/dev/null
-    sleep 5
-    pkill -KILL -P "$cpid" 2>/dev/null
-    kill  -KILL "$cpid" 2>/dev/null
-    wait "$cpid" 2>/dev/null
-    rc=124; [ "$reason" = "stall" ] && rc=125
-  else
-    wait "$cpid"; rc=$?
-  fi
+    "$PUBLISH_PROMPT" > "$ATTEMPT_OUT" 2>&1
+  local rc=$?
   set -e
   cat "$ATTEMPT_OUT" >> "$LOG_FILE"
-  LAST_ATTEMPT_REASON="$reason"
+  LAST_ATTEMPT_REASON=""
+  [ "$rc" -eq 124 ] && LAST_ATTEMPT_REASON="timeout"
   return "$rc"
 }
 
@@ -447,8 +420,6 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
   rc=0; run_publish || rc=$?
   if [ "$rc" -eq 124 ]; then
     log "WARN: publish step hit the ${PUBLISH_TIMEOUT}s hard timeout and was killed."
-  elif [ "$rc" -eq 125 ]; then
-    log "WARN: publish step stalled (no output for ${PUBLISH_STALL_LIMIT}s) and was killed."
   elif [ "$rc" -ne 0 ]; then
     log "WARN: publish step exited non-zero (rc=$rc)."
   else

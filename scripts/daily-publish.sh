@@ -9,10 +9,10 @@ LOG_DIR="/home/mike/.local/log"
 LOG_FILE="$LOG_DIR/knt-herald-$(date +%Y-%m-%d).log"
 SLACK_CHANNEL="C0AEBQ36W05"  # #bast-chat
 SITE_URL="https://kratomnewstoday.com"
-PUBLISH_TIMEOUT=1800   # hard wall-clock cap for the claude publish step (30 min).
-                        # Research alone now runs ~550-650s with the current queries, so the wall
-                        # is generous to leave synthesis + publish room under a single attempt.
-MAX_ATTEMPTS=2         # how many times to attempt publish if no briefing lands
+RESEARCH_TIMEOUT=1200  # hard cap for the Python research phase (Perplexity); research runs ~550-670s.
+PUBLISH_TIMEOUT=1800   # hard wall-clock cap for the claude SYNTHESIS+publish step (30 min).
+MAX_ATTEMPTS=2         # synthesis attempts if no briefing lands (research runs once, up front).
+HERALD_DIR="/home/mike/.claude/skills/herald"
 
 mkdir -p "$LOG_DIR"
 
@@ -348,28 +348,51 @@ git pull --ff-only origin main >> "$LOG_FILE" 2>&1 || {
 # independent of whatever Claude prints to stdout.
 START_HEAD=$(git rev-parse HEAD)
 
-PUBLISH_PROMPT="You are running the KNT daily publishing workflow. Follow these steps exactly:
+# --- Research phase (deterministic Python, NOT the agent) ---
+# Run Perplexity research + de-noise + context retrieval in the shell and save the
+# findings to a file. Keeping this OUT of the agent is the whole point of this
+# design: the agent used to background this ~10-minute call and end its turn
+# before ever synthesizing. The shell just blocks on it normally.
+RESEARCH_FILE=$(mktemp "/tmp/knt-research-$(date +%Y%m%d)-XXXXXX.json")
+log "Running Herald research (Python/Perplexity, up to ${RESEARCH_TIMEOUT}s)..."
+set +e
+timeout -k 30 "$RESEARCH_TIMEOUT" "$HERALD_DIR/.venv/bin/python" "$HERALD_DIR/run_phase.py" \
+  research --config-dir "$REPO_DIR" > "$RESEARCH_FILE" 2>>"$LOG_FILE"
+research_rc=$?
+set -e
+if [ "$research_rc" -ne 0 ]; then
+  log "ERROR: research phase failed (rc=$research_rc) or timed out."
+  slack_notify "⚠ KNT daily publish FAILED: research phase errored (rc=$research_rc). Check $LOG_FILE"
+  exit 1
+fi
+RSTATUS=$(python3 -c "import json; print(json.load(open('$RESEARCH_FILE')).get('status','?'))" 2>/dev/null || echo "?")
+NUM_FINDINGS=$(python3 -c "import json; d=json.load(open('$RESEARCH_FILE')); f=d.get('findings') or {}; print(len(f.get('findings',[])) if isinstance(f,dict) else 0)" 2>/dev/null || echo 0)
+log "Research complete: status=$RSTATUS, $NUM_FINDINGS findings -> $RESEARCH_FILE"
+if [ "$RSTATUS" != "success" ]; then
+  log "ERROR: research returned status=$RSTATUS (no usable findings)."
+  slack_notify "⚠ KNT daily publish FAILED: research status=$RSTATUS. Check $LOG_FILE"
+  exit 1
+fi
 
-1. Run herald run --config-dir /home/mike/Documents/kratom-news-today
-   This invokes the Herald skill which will research, triage, synthesize, and check briefings.
+PUBLISH_PROMPT="You are running the KNT daily publishing workflow. Herald's RESEARCH PHASE IS ALREADY DONE — do NOT run it again and do NOT run \`herald run\`. The research findings (with related-coverage context and the loaded config) are saved as JSON at:
 
-2. After Herald completes, follow the publishing workflow in agent-docs/publishing-workflow.md:
-   - Validate the draft(s)
-   - Generate OG images: node scripts/generate-og-image.js --slug=<slug> --title=\"<title>\" --beat=<beat> --date=\"<date>\"
-   - Move draft(s) from drafts/ to content/briefings/
-   - Commit with message format: publish: <title>
-   - Push to origin main
+  $RESEARCH_FILE
 
-3. After push, output ONLY a JSON object on the last line:
-   {\"status\":\"success\",\"slugs\":[\"the-slug\"]}
-   If Herald's triage legitimately finds no publishable new development (a real
-   no-news day, NOT a technical failure), skip synthesis/publish and output:
-   {\"status\":\"no_news\",\"message\":\"why nothing was publishable\"}
-   If anything fails technically (research crashed, build error, push rejected),
-   output: {\"status\":\"error\",\"message\":\"what went wrong\"}
+Steps:
 
-Do not ask questions. Do not wait for input. Do NOT start a dev server or any
-long-running foreground process. Execute the full pipeline and exit."
+1. Read $RESEARCH_FILE. Its keys: findings, context, config, options.
+
+2. Follow the Herald synthesis pipeline in ~/.claude/skills/herald/SKILL.md, Phases 2-5, using those saved findings as the research input (skip Phase 1, Research — it is done):
+   - Triage the findings into distinct stories.
+   - Synthesize each briefing using the synthesis prompt (~/.claude/skills/herald/prompts/synthesis-agent.xml), voice.md and rules.md in $REPO_DIR, and the frontmatter schema (~/.claude/skills/herald/schemas/frontmatter.yaml). Carefully distinguish natural-trace vs concentrated vs synthetic 7-OH.
+   - Run the voice, rules, and compliance checks and revise as needed. If a compliance violation cannot be resolved, halt and report (do NOT publish).
+   - Write each finalized draft with: cd ~/.claude/skills/herald && .venv/bin/python run_phase.py write --config-dir $REPO_DIR --draft /tmp/herald-draft-<slug>.md
+
+3. For each written draft, follow agent-docs/publishing-workflow.md: validate, generate the OG image (node scripts/generate-og-image.js --slug=<slug> --title=\"<title>\" --beat=<beat> --date=\"<date>\"), move it into content/briefings/, commit with message 'publish: <title>', and push origin main.
+
+4. Output ONLY a JSON object on the last line: {\"status\":\"success\",\"slugs\":[\"the-slug\"]}. If triage finds no publishable new development (a real no-news day, NOT a technical failure), skip synthesis and output {\"status\":\"no_news\",\"message\":\"why nothing was publishable\"}. On a technical failure output {\"status\":\"error\",\"message\":\"what went wrong\"}.
+
+CRITICAL EXECUTION RULES: run every command in the FOREGROUND and wait for it. Do NOT run anything in the background, do NOT schedule a wakeup, do NOT wait for a notification, do NOT ask questions. The research file already exists, so there is nothing long-running to wait on. Complete the synthesis and publish in this single turn, then exit."
 
 # Run the publish step under a hard wall-clock timeout. timeout sends SIGTERM at
 # the limit, then SIGKILL 30s later if it's still alive — so a hung Claude can no
@@ -416,10 +439,10 @@ PUBLISHED_FILES=""
 NO_NEWS=0
 attempt=1
 while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
-  log "Running Herald research + publish pipeline (attempt $attempt/$MAX_ATTEMPTS, timeout ${PUBLISH_TIMEOUT}s)..."
+  log "Running Herald synthesis + publish agent (attempt $attempt/$MAX_ATTEMPTS, timeout ${PUBLISH_TIMEOUT}s)..."
   rc=0; run_publish || rc=$?
   if [ "$rc" -eq 124 ]; then
-    log "WARN: publish step hit the ${PUBLISH_TIMEOUT}s hard timeout and was killed."
+    log "WARN: synthesis step hit the ${PUBLISH_TIMEOUT}s hard timeout and was killed."
   elif [ "$rc" -ne 0 ]; then
     log "WARN: publish step exited non-zero (rc=$rc)."
   else

@@ -348,6 +348,25 @@ git pull --ff-only origin main >> "$LOG_FILE" 2>&1 || {
 # independent of whatever Claude prints to stdout.
 START_HEAD=$(git rev-parse HEAD)
 
+# --- Auth preflight (cheap, BEFORE the expensive research call) ---
+# The synthesis/publish step shells out to `claude -p`, which fails fast with
+# "Not logged in · Please run /login" (rc=1) when the CLI's OAuth token has
+# expired overnight. That used to surface only AFTER the ~8-minute Perplexity
+# research call, burning the spend for a run that could never publish. Probe auth
+# with a tiny prompt up front and abort loudly if it's logged out — no tools, no
+# permissions, ~1 cent, a few seconds.
+log "Checking Claude CLI auth..."
+set +e
+AUTH_OUT=$(timeout -k 10 60 claude -p --max-budget-usd 0.10 "Reply with exactly: OK" 2>&1)
+auth_rc=$?
+set -e
+if [ "$auth_rc" -ne 0 ] || echo "$AUTH_OUT" | grep -qiE "not logged in|please run /login"; then
+  log "ERROR: Claude CLI not authenticated (rc=$auth_rc). Output: $AUTH_OUT"
+  slack_notify "⚠ KNT daily publish ABORTED before research: Claude CLI is logged out, so the publish step can't run. Run \`/login\` in a Claude Code session on the host, then re-run scripts/daily-publish.sh. No research spend was used. Log: $LOG_FILE"
+  exit 1
+fi
+log "Claude CLI auth OK."
+
 # --- Research phase (deterministic Python, NOT the agent) ---
 # Run Perplexity research + de-noise + context retrieval in the shell and save the
 # findings to a file. Keeping this OUT of the agent is the whole point of this

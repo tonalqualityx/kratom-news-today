@@ -59,6 +59,8 @@ When covering 7-OH (7-hydroxymitragynine), the publication distinguishes careful
 
 Conflating these produces inaccurate reporting. Each is regulated and commercially distinct.
 
+**In negative reporting, identify 7-OH early.** When a negative development (death, hospitalization, seizure, ban, lawsuit, recall, enforcement action) involves a 7-OH product, name it as a 7-OH product in the lede, not buried lower, and state that it is a concentrated or synthetic preparation distinct from natural leaf kratom. Where the source does not make clear whether a 7-OH product or natural leaf kratom was involved, surface that ambiguity explicitly rather than implying natural leaf kratom caused the harm. Keep it reported ("according to [source]"), never a health claim in the publication's voice, and stay vendor-neutral. (Authoritative version: Required Framing 7 in `rules.md`.)
+
 ## When in doubt
 
 When an editorial question is ambiguous, the default is the more conservative answer:

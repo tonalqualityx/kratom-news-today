@@ -38,6 +38,8 @@ These constraints are enforced by the rules-check agent. Violations are flagged 
 
 6. **Always front-load the news in headlines.** The most important fact comes first. Analysis frames, "what this means" framings, and editorial angles do not appear in headlines. Headlines describe what happened.
 
+7. **Always identify a 7-OH product early in negative reporting, and distinguish it from natural leaf kratom.** When a negative development (death, hospitalization, seizure, arrest, ban, lawsuit, recall, or enforcement action) involves a 7-hydroxymitragynine (7-OH) product, name it as a 7-OH product in the lede or opening, not buried lower in the piece. State plainly that the product at issue is a concentrated or synthetic 7-OH preparation, distinct from the trace 7-OH naturally present in raw kratom leaf, whenever 7-OH is the subject of the negative story. Where the source reporting does not make clear whether a 7-OH product or natural leaf kratom was involved, surface that ambiguity explicitly ("the reporting does not specify whether the product was a concentrated 7-OH preparation or natural leaf kratom") rather than implying natural leaf kratom caused the harm. This framing is reported, not asserted: attribution stays "according to [source]," and the publication makes no health claim of its own. Vendor-neutrality is unaffected — identifying a product category is not naming or endorsing a vendor, and no vendor link belongs in the piece unless the news is about that company.
+
 ## Forbidden Link Targets
 
 Editorial article bodies do NOT link to:
@@ -100,6 +102,14 @@ These examples calibrate the rules-check agent. Each is a real-world pattern tha
 **Bad:** "The FDA dropped a bombshell decision on the kratom industry today, devastating the burgeoning sector."
 **Why:** Sensationalist language ("dropped a bombshell," "devastating," "burgeoning sector"); editorializing without attribution.
 **Correction:** "The FDA announced today that it will recommend Schedule I classification for synthetic 7-hydroxymitragynine preparations. Industry advocates and operators are still processing the announcement."
+
+**Bad:** "Two people died after taking kratom, according to the county coroner. The products, sold as '7-OH shots,' were bought at a local smoke shop."
+**Why:** The 7-OH product is the subject of the deaths but is not identified as 7-OH until the second sentence, and the piece never distinguishes the concentrated/synthetic 7-OH product from natural leaf kratom, leaving natural-product coverage tarred by a synthetic-product incident.
+**Correction:** "Two people died after taking a concentrated 7-hydroxymitragynine (7-OH) product, a synthetic derivative distinct from the trace 7-OH in natural kratom leaf, according to the county coroner. The products, sold as '7-OH shots,' were bought at a local smoke shop."
+
+**Bad:** "Three hospitalizations in Ohio were linked to kratom this week, according to the state health department."
+**Why:** The source may be describing a concentrated or synthetic 7-OH product rather than natural leaf kratom, but the piece implies natural kratom without surfacing the ambiguity.
+**Correction:** "Three hospitalizations in Ohio were linked to kratom products this week, according to the state health department. The department's notice does not specify whether the products involved were concentrated or synthetic 7-hydroxymitragynine (7-OH) preparations or natural leaf kratom, a distinction that materially changes the products' risk profiles."
 
 ## Compliance Hard Constraints
 
@@ -185,6 +195,6 @@ When covering 7-OH specifically, the publication distinguishes carefully between
 - 7-OH as it appears in concentrated extracts (variable concentrations)
 - Synthetic 7-OH preparations (higher concentrations, currently the regulatory focus)
 
-These three are not the same thing, and conflating them produces inaccurate reporting. The synthesis agent should attend to which specific 7-OH context is at issue.
+These three are not the same thing, and conflating them produces inaccurate reporting. The synthesis agent should attend to which specific 7-OH context is at issue. In negative reporting specifically, Required Framing 7 applies: identify a 7-OH product early (in the lede), state that it is a concentrated or synthetic preparation distinct from natural leaf kratom, and surface any source ambiguity rather than implying natural leaf kratom caused the harm.
 
 The publication uses the Oxford comma. Numbers under ten are spelled out; ten and above use numerals. Dates use "Month Day, Year" format. URLs are linked, not displayed inline.

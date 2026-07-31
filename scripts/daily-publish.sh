@@ -354,10 +354,13 @@ START_HEAD=$(git rev-parse HEAD)
 # expired overnight. That used to surface only AFTER the ~8-minute Perplexity
 # research call, burning the spend for a run that could never publish. Probe auth
 # with a tiny prompt up front and abort loudly if it's logged out — no tools, no
-# permissions, ~1 cent, a few seconds.
+# permissions, ~1 cent, a few seconds. Probe on Haiku: auth is account-level so the
+# model is irrelevant to the login check, and it keeps the probe genuinely cheap so
+# the $0.10 budget guard doesn't trip on loaded-context input cost (a bare Opus
+# probe now exceeds $0.10 just loading CLAUDE.md + skills, which is a false logout).
 log "Checking Claude CLI auth..."
 set +e
-AUTH_OUT=$(timeout -k 10 60 claude -p --max-budget-usd 0.10 "Reply with exactly: OK" 2>&1)
+AUTH_OUT=$(timeout -k 10 60 claude -p --model claude-haiku-4-5-20251001 --max-budget-usd 0.10 "Reply with exactly: OK" 2>&1)
 auth_rc=$?
 set -e
 if [ "$auth_rc" -ne 0 ] || echo "$AUTH_OUT" | grep -qiE "not logged in|please run /login"; then
@@ -385,11 +388,22 @@ if [ "$research_rc" -ne 0 ]; then
   exit 1
 fi
 RSTATUS=$(python3 -c "import json; print(json.load(open('$RESEARCH_FILE')).get('status','?'))" 2>/dev/null || echo "?")
+RMSG=$(python3 -c "import json; print(json.load(open('$RESEARCH_FILE')).get('message',''))" 2>/dev/null || echo "")
+RTYPE=$(python3 -c "import json; print(json.load(open('$RESEARCH_FILE')).get('error_type',''))" 2>/dev/null || echo "")
 NUM_FINDINGS=$(python3 -c "import json; d=json.load(open('$RESEARCH_FILE')); f=d.get('findings') or {}; print(len(f.get('findings',[])) if isinstance(f,dict) else 0)" 2>/dev/null || echo 0)
 log "Research complete: status=$RSTATUS, $NUM_FINDINGS findings -> $RESEARCH_FILE"
 if [ "$RSTATUS" != "success" ]; then
-  log "ERROR: research returned status=$RSTATUS (no usable findings)."
-  slack_notify "⚠ KNT daily publish FAILED: research status=$RSTATUS. Check $LOG_FILE"
+  log "ERROR: research returned status=$RSTATUS: ${RMSG:-no usable findings}"
+  # Prefer the engine's specific, actionable message; fall back to the generic one.
+  if [ "$RTYPE" = "perplexity_quota" ]; then
+    slack_notify "⚠ KNT daily publish FAILED: Perplexity API is out of quota/credits — no briefing today. Top up the account at https://www.perplexity.ai/settings/api, then re-run scripts/daily-publish.sh. Log: $LOG_FILE"
+  elif [ "$RTYPE" = "perplexity_auth" ]; then
+    slack_notify "⚠ KNT daily publish FAILED: Perplexity API key was rejected (authentication). Check or rotate perplexity_api_key in ~/.config/herald/credentials, then re-run scripts/daily-publish.sh. Log: $LOG_FILE"
+  elif [ -n "$RMSG" ]; then
+    slack_notify "⚠ KNT daily publish FAILED: $RMSG Check $LOG_FILE"
+  else
+    slack_notify "⚠ KNT daily publish FAILED: research status=$RSTATUS. Check $LOG_FILE"
+  fi
   exit 1
 fi
 
@@ -433,19 +447,35 @@ trap 'rm -f "$ATTEMPT_OUT"' EXIT
 # queries + de-noised findings); this hard wall is the only backstop we need.
 # --verbose still lands the full transcript in the log on exit.
 LAST_ATTEMPT_REASON=""
+# --max-budget-usd is a RUNAWAY backstop, not a per-run cost target. It was 5.00,
+# but by late July it tripped on ~half the runs (07-24/26/28/29/31) — including
+# single-briefing days — as loaded context (CLAUDE.md + skills + research findings)
+# crept up, and it reliably blew on 2–3 briefing days. Every one of those runs had
+# already produced its briefing(s) before dying, so the cap was killing completed
+# work, not runaways. Raised to 10.00: ~2x the current single-briefing spend, which
+# comfortably covers a 2–3 briefing day while still catching a genuinely runaway
+# agent. The 30-min PUBLISH_TIMEOUT is the orthogonal wall-clock backstop.
 run_publish() {
   set +e
   : > "$ATTEMPT_OUT"
   timeout -k 30 "$PUBLISH_TIMEOUT" claude -p \
     --dangerously-skip-permissions \
     --verbose \
-    --max-budget-usd 5.00 \
+    --max-budget-usd 10.00 \
     "$PUBLISH_PROMPT" > "$ATTEMPT_OUT" 2>&1
   local rc=$?
   set -e
   cat "$ATTEMPT_OUT" >> "$LOG_FILE"
   LAST_ATTEMPT_REASON=""
-  [ "$rc" -eq 124 ] && LAST_ATTEMPT_REASON="timeout"
+  if [ "$rc" -eq 124 ]; then
+    LAST_ATTEMPT_REASON="timeout"
+  elif grep -qiE 'Exceeded USD budget|max-budget' "$ATTEMPT_OUT"; then
+    # Budget-cap exit: NOT a real failure on its own — it usually means the run
+    # finished its briefing(s) and only then ran over. Flag the reason so the log
+    # and any Slack alert read "budget", distinct from a genuine ERROR. The
+    # published-files check below remains the real arbiter of success.
+    LAST_ATTEMPT_REASON="budget"
+  fi
   return "$rc"
 }
 
@@ -462,6 +492,8 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
   rc=0; run_publish || rc=$?
   if [ "$rc" -eq 124 ]; then
     log "WARN: synthesis step hit the ${PUBLISH_TIMEOUT}s hard timeout and was killed."
+  elif [ "$rc" -ne 0 ] && [ "$LAST_ATTEMPT_REASON" = "budget" ]; then
+    log "NOTE: publish agent hit its USD budget cap (rc=$rc) — not a failure in itself; checking whether briefing(s) still landed."
   elif [ "$rc" -ne 0 ]; then
     log "WARN: publish step exited non-zero (rc=$rc)."
   else
@@ -505,14 +537,44 @@ if [ -z "$PUBLISHED_FILES" ]; then
   exit 1
 fi
 
-# A timeout-kill can land between commit and push — make sure it's on origin.
-if [ -n "$(git log origin/main..HEAD --oneline 2>/dev/null)" ]; then
-  log "Local commit(s) not on origin yet — pushing..."
-  git push origin main >> "$LOG_FILE" 2>&1 || {
-    log "ERROR: git push failed"
-    slack_notify "⚠ KNT publish: briefing committed but PUSH FAILED. Check $LOG_FILE"
-    exit 1
-  }
+# Make sure the day's briefing(s) are on origin — but decide against REAL remote
+# state, and NEVER let a push hiccup cost the day's send.
+#
+# The publish agent usually pushes its own commit to origin DURING the run. So by
+# the time we reach here the remote typically already holds HEAD, and a second
+# wrapper push gets rejected by git's compare-and-swap purely BECAUSE the work
+# already succeeded. The old code compared HEAD against the STALE local origin/main
+# tracking ref, saw "commits not on origin yet", pushed, hit
+# "cannot lock ref 'refs/heads/main'... is at <new> but expected <stale>", and
+# exit 1'd — killing the Klaviyo send even though both briefings were already live.
+# Two rules now:
+#   1. Fetch first; compare HEAD to the AUTHORITATIVE remote sha, not a stale ref.
+#   2. An unnecessary push (remote already has HEAD) is SUCCESS. A genuine push
+#      failure is logged + alerted but is NON-FATAL — the notification always runs,
+#      because the briefings deploy independently of this wrapper's push.
+git fetch --quiet origin main >> "$LOG_FILE" 2>&1 || log "WARN: git fetch origin main failed; comparing via ls-remote only."
+REMOTE_MAIN=$(git ls-remote origin main 2>>"$LOG_FILE" | awk 'NR==1{print $1}') || REMOTE_MAIN=""
+LOCAL_HEAD=$(git rev-parse HEAD)
+if [ -z "$REMOTE_MAIN" ]; then
+  log "WARN: could not read origin/main — attempting a fallback push (non-fatal)."
+  if git push origin main >> "$LOG_FILE" 2>&1; then
+    log "Fallback push succeeded."
+  else
+    log "WARN: fallback push failed and remote state is unknown; sending the newsletter anyway."
+    slack_notify "⚠ KNT publish: wrapper push failed and remote state was unverifiable — newsletter sent anyway. Confirm briefings are live: $LOG_FILE"
+  fi
+elif [ "$REMOTE_MAIN" = "$LOCAL_HEAD" ]; then
+  log "origin/main already at HEAD ($LOCAL_HEAD) — the publish agent pushed during the run. No wrapper push needed."
+elif git merge-base --is-ancestor "$REMOTE_MAIN" "$LOCAL_HEAD" 2>/dev/null; then
+  log "HEAD is ahead of origin/main — pushing..."
+  if git push origin main >> "$LOG_FILE" 2>&1; then
+    log "Push succeeded."
+  else
+    log "WARN: git push failed though HEAD is ahead of origin — NON-FATAL; the newsletter still sends. Push by hand later."
+    slack_notify "⚠ KNT publish: briefing committed but wrapper PUSH FAILED (HEAD ahead of origin). Newsletter sent anyway; push by hand and check $LOG_FILE"
+  fi
+else
+  log "origin/main ($REMOTE_MAIN) is ahead of or diverged from HEAD ($LOCAL_HEAD) — not pushing (never force). Proceeding to notification."
 fi
 
 # Notify Slack per published briefing, and collect every briefing's email data

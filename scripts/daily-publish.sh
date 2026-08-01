@@ -14,6 +14,23 @@ PUBLISH_TIMEOUT=1800   # hard wall-clock cap for the claude SYNTHESIS+publish st
 MAX_ATTEMPTS=2         # synthesis attempts if no briefing lands (research runs once, up front).
 HERALD_DIR="/home/mike/.claude/skills/herald"
 
+# --- Deploy-watch / liveness config ---
+# The GitHub Action "Build and Deploy" is a SEPARATE system that can fail AFTER
+# the push lands (08-01: rsync exit 1 after the wrapper had declared success, so
+# subscribers held an email to a 404 for ~18 min). The wrapper now waits for that
+# deploy, retries once on failure, and proves the page is actually live before it
+# lets the newsletter go out.
+DEPLOY_WORKFLOW="Build and Deploy"     # workflow name in .github/workflows/deploy.yml
+DEPLOY_FIND_TIMEOUT=180                 # secs to wait for the run to appear after a push
+DEPLOY_WATCH_TIMEOUT=1200              # hard cap (secs) on watching one run to a terminal state
+DEPLOY_MAX_ATTEMPTS=2                  # 1 initial + 1 retry, per Mike's "retry at least once" rule
+SITEMAP_URL="$SITE_URL/sitemap.xml"    # liveness asserts each slug appears here
+
+# Testability guards (see agent-docs/deploy-liveness-gate-plan.md):
+#   KNT_DRY_RUN=1   -> hard-stub the Klaviyo send (the list is LIVE subscribers)
+#   KNT_LIB_ONLY=1  -> source this file for its functions/config without running main
+KNT_DRY_RUN="${KNT_DRY_RUN:-}"
+
 mkdir -p "$LOG_DIR"
 
 # Read Slack bot token from Openclaw config at runtime
@@ -65,6 +82,12 @@ send_klaviyo_campaign() {
   count=$(python3 -c "import json,sys; print(len(json.loads(sys.argv[1])))" "$articles_json" 2>/dev/null || echo 0)
   if [ "$count" -eq 0 ]; then
     log "No articles to email, skipping Klaviyo campaign."
+    return
+  fi
+
+  # Hard test guard: never touch the live subscriber list during a dry run.
+  if [ -n "$KNT_DRY_RUN" ]; then
+    log "DRY RUN (KNT_DRY_RUN set): would send Klaviyo campaign with $count article(s) — send SUPPRESSED."
     return
   fi
 
@@ -332,6 +355,128 @@ print(json.dumps({'title': fm('title'), 'summary': fm('summary'), 'url': url}))
 PYEOF
 }
 
+# --- Deploy watch + liveness gate ---------------------------------------------
+# These are the four behaviors from Citadel task 1048b593. They are defined as
+# small, overridable functions so the control flow can be fault-injected in a
+# test harness (redefine _watch_deploy_run / _find_deploy_run / _rerun_deploy)
+# without ever touching the real prod deploy. See agent-docs/deploy-liveness-gate-plan.md.
+
+# Find the "Build and Deploy" run id for a given commit SHA. The push usually
+# starts the run within a few seconds, but there is a lag, so poll until it
+# appears or DEPLOY_FIND_TIMEOUT elapses. Echoes the run id (empty if none).
+_find_deploy_run() {
+  local sha="$1" deadline id
+  deadline=$(( $(date +%s) + DEPLOY_FIND_TIMEOUT ))
+  while [ "$(date +%s)" -le "$deadline" ]; do
+    id=$(gh run list --workflow "$DEPLOY_WORKFLOW" --branch main \
+           --json databaseId,headSha -L 20 2>/dev/null \
+         | python3 -c "import json,sys; sha=sys.argv[1]; runs=json.load(sys.stdin); print(next((str(r['databaseId']) for r in runs if r.get('headSha')==sha), ''))" "$sha" 2>/dev/null)
+    if [ -n "$id" ]; then echo "$id"; return 0; fi
+    sleep 8
+  done
+  echo ""
+  return 1
+}
+
+# Watch a run to a terminal state and echo its conclusion (success/failure/...).
+# Wrapped in `timeout` so a stuck run can never block the wrapper forever.
+_watch_deploy_run() {
+  local id="$1"
+  timeout -k 15 "$DEPLOY_WATCH_TIMEOUT" gh run watch "$id" --exit-status >/dev/null 2>&1 || true
+  gh run view "$id" --json conclusion -q '.conclusion' 2>/dev/null || echo "unknown"
+}
+
+# Re-run the deploy after a failure. If the run has failed jobs, re-run just those
+# (same run id, new attempt). If it had none (e.g. green-but-not-live), dispatch a
+# fresh deploy and return the new run id. Echoes the run id to watch next.
+_rerun_deploy() {
+  local id="$1" sha="$2" newid
+  if gh run rerun "$id" --failed >/dev/null 2>&1; then
+    echo "$id"; return 0
+  fi
+  # No failed jobs to re-run — trigger a fresh deploy via workflow_dispatch.
+  if gh workflow run "$DEPLOY_WORKFLOW" --ref main >/dev/null 2>&1; then
+    sleep 8
+    newid=$(_find_deploy_run "$sha")
+    # A dispatched run has no push SHA match; fall back to the newest run on main.
+    [ -z "$newid" ] && newid=$(gh run list --workflow "$DEPLOY_WORKFLOW" --branch main \
+        --json databaseId -L 1 -q '.[0].databaseId' 2>/dev/null)
+    echo "$newid"; return 0
+  fi
+  echo "$id"; return 1
+}
+
+# Liveness: every published slug must return HTTP 200 (cache-buster) AND appear in
+# sitemap.xml. A green Action is not proof the page is reachable — only fetching it
+# is. Returns 0 only if ALL slugs are live. Args: the slugs.
+check_liveness() {
+  local slug code ok=0 sitemap
+  sitemap=$(curl -s --max-time 30 "$SITEMAP_URL?cb=$(date +%s)" 2>/dev/null || echo "")
+  for slug in "$@"; do
+    [ -z "$slug" ] && continue
+    code=$(curl -s -o /dev/null --max-time 30 -w "%{http_code}" \
+             "$SITE_URL/briefings/$slug/?cb=$(date +%s)" 2>/dev/null || echo "000")
+    if [ "$code" != "200" ]; then
+      log "LIVENESS FAIL: $SITE_URL/briefings/$slug/ returned HTTP $code (expected 200)."
+      ok=1
+    elif ! printf '%s' "$sitemap" | grep -q "$slug"; then
+      log "LIVENESS FAIL: slug '$slug' not found in $SITEMAP_URL."
+      ok=1
+    else
+      log "LIVENESS OK: /briefings/$slug/ is 200 and present in sitemap."
+    fi
+  done
+  return "$ok"
+}
+
+# Orchestrate: watch the deploy for $sha, retry once on failure OR on green-but-
+# not-live, and only return 0 once the deploy is terminal-success AND every slug
+# is live. Every attempt is logged. Args: sha, then the slugs.
+wait_for_deploy_and_verify() {
+  local sha="$1"; shift
+  local slugs=("$@")
+  local attempt=1 run_id conclusion
+
+  run_id=$(_find_deploy_run "$sha")
+  if [ -z "$run_id" ]; then
+    log "ERROR: no '$DEPLOY_WORKFLOW' run found for $sha within ${DEPLOY_FIND_TIMEOUT}s."
+    return 1
+  fi
+
+  while [ "$attempt" -le "$DEPLOY_MAX_ATTEMPTS" ]; do
+    log "Deploy attempt $attempt/$DEPLOY_MAX_ATTEMPTS: watching run $run_id ..."
+    conclusion=$(_watch_deploy_run "$run_id")
+    log "Deploy run $run_id concluded: $conclusion"
+
+    if [ "$conclusion" = "success" ]; then
+      if check_liveness "${slugs[@]}"; then
+        log "Deploy succeeded and all briefing(s) are live."
+        return 0
+      fi
+      log "Deploy was green but liveness failed — treating as a failure for retry purposes."
+    fi
+
+    if [ "$attempt" -lt "$DEPLOY_MAX_ATTEMPTS" ]; then
+      log "Retrying deploy (attempt $((attempt + 1)) of $DEPLOY_MAX_ATTEMPTS)..."
+      run_id=$(_rerun_deploy "$run_id" "$sha")
+      if [ -z "$run_id" ]; then
+        log "ERROR: could not start a retry deploy run."
+        return 1
+      fi
+    fi
+    attempt=$((attempt + 1))
+  done
+
+  log "ERROR: deploy did not reach a live state after $DEPLOY_MAX_ATTEMPTS attempt(s)."
+  return 1
+}
+
+# Allow `KNT_LIB_ONLY=1 source scripts/daily-publish.sh` to load the functions and
+# config above WITHOUT executing the pipeline below — used by the test harness.
+if [ -n "${KNT_LIB_ONLY:-}" ]; then
+  return 0 2>/dev/null || exit 0
+fi
+
 # --- Main ---
 log "=== KNT Daily Publish starting ==="
 cd "$REPO_DIR"
@@ -577,19 +722,19 @@ else
   log "origin/main ($REMOTE_MAIN) is ahead of or diverged from HEAD ($LOCAL_HEAD) — not pushing (never force). Proceeding to notification."
 fi
 
-# Notify Slack per published briefing, and collect every briefing's email data
-# so they all ride in a single Klaviyo campaign (one email per day, never one
-# per article). Sourced from the committed files.
+# Collect every briefing's slug + email data. NOTHING is announced as "live" and
+# NOTHING is emailed until the deploy is watched to success AND the pages are
+# proven reachable — the send is gated on liveness, never on the push (08-01:
+# the push/commit succeeded but the deploy failed, so the newsletter linked a 404).
 ARTICLES_JSON="[]"
+SLUGS=()
 while IFS= read -r f; do
   [ -z "$f" ] && continue
   slug=$(python3 -c "import re,sys; c=open(sys.argv[1]).read(); m=re.search(r'^slug:\s*\"?(.+?)\"?\s*\$', c, re.M); print(m.group(1) if m else '')" "$f" 2>/dev/null)
   if [ -z "$slug" ]; then
     slug=$(basename "$f" .md | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//')
   fi
-
-  # Slack: one message per briefing.
-  notify_for_slug "$slug"
+  SLUGS+=("$slug")
 
   # Email: append this briefing to the array (skip if its file can't be read).
   if article=$(extract_article_data "$slug"); then
@@ -597,8 +742,22 @@ while IFS= read -r f; do
   fi
 done <<< "$PUBLISHED_FILES"
 
-# Email: ONE Klaviyo campaign carrying all of today's briefings.
-send_klaviyo_campaign "$ARTICLES_JSON"
+# THE LIVENESS GATE. Watch the deploy for the pushed commit, retry once on failure,
+# and require every briefing URL to be live before anything goes out.
+if wait_for_deploy_and_verify "$LOCAL_HEAD" "${SLUGS[@]}"; then
+  # Live: announce on Slack (one message per briefing) and send the one daily email.
+  for slug in "${SLUGS[@]}"; do
+    [ -z "$slug" ] && continue
+    notify_for_slug "$slug"
+  done
+  send_klaviyo_campaign "$ARTICLES_JSON"
+  log "SUCCESS: published, verified live, and notified."
+else
+  # Not live after the retry: DO NOT email subscribers. Alert loudly instead.
+  log "ERROR: briefing(s) did not go live after deploy + retry — SUPPRESSING the newsletter."
+  slack_notify "⚠ KNT publish: briefing(s) committed but NOT verified live after deploy + one retry. Newsletter was NOT sent (no email to a 404). Check the deploy Action and $LOG_FILE"
+  log "=== KNT Daily Publish finished (email suppressed — not live) ==="
+  exit 1
+fi
 
-log "SUCCESS: published and notified."
 log "=== KNT Daily Publish finished ==="

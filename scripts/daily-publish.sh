@@ -318,14 +318,23 @@ PYEOF
 
   log "Notifying for: $title"
 
+  # Advisory rules-check warning (Sources section, rules.md:37), if one was
+  # recorded for this slug earlier in the run. Appended to the SAME "published"
+  # message rather than a separate alert -- loud, but never a second interruption
+  # and never a reason to withhold the notification.
+  local rules_warning="${RULES_WARNINGS[$slug]:-}"
+
   local payload
   payload=$(python3 -c "
 import json, sys
-title, beat, url, chan = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+title, beat, url, chan, warning = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
 beat_tag = f' [{beat}]' if beat else ''
-msg = '\n'.join(['📰 *KNT Daily Briefing Published*', '', f'<{url}|{title}>{beat_tag}', '', '1 briefing(s) live.'])
+lines = ['📰 *KNT Daily Briefing Published*', '', f'<{url}|{title}>{beat_tag}', '', '1 briefing(s) live.']
+if warning:
+    lines += ['', f'⚠️ *Rules-check warning (advisory, not blocking):* {warning}']
+msg = '\n'.join(lines)
 print(json.dumps({'channel': chan, 'text': msg, 'unfurl_links': False}))
-" "$title" "$beat" "$url" "$SLACK_CHANNEL" 2>/dev/null)
+" "$title" "$beat" "$url" "$SLACK_CHANNEL" "$rules_warning" 2>/dev/null)
   slack_notify_json "$payload"
 }
 
@@ -352,6 +361,68 @@ def fm(key):
     m = re.search(r'^%s:\s*"?(.+?)"?\s*$' % key, content, re.MULTILINE)
     return m.group(1).strip() if m else ''
 print(json.dumps({'title': fm('title'), 'summary': fm('summary'), 'url': url}))
+PYEOF
+}
+
+# --- Advisory rules-check: mandatory Sources section (rules.md:37) -----------
+# rules.md Required Framing 5: "Always end briefings with a Sources section...
+# non-negotiable." Herald's real rules-check agent has flagged this as a hard
+# violation on every one of the last several days' briefings (see
+# ~/.claude/skills/herald/logs/*.log) because the synthesis session omitted the
+# body-level `## Sources` heading, and nothing downstream of that check verdict
+# ever stopped the publish or made noise about it -- it just proceeded past
+# violations-found silently. This check catches the same condition
+# deterministically (no extra `claude -p` call, so it costs nothing and cannot
+# itself hang the publish) right before the "published" Slack notification, and
+# makes it LOUD instead of silent.
+#
+# ADVISORY ONLY, by design (Mike explicitly deferred fail-closed for this rule):
+# a failing check here NEVER blocks the commit/push/deploy/email that already
+# happened earlier in the run -- it only adds a visible warning to the log and
+# to the per-briefing Slack notification, same as any other post-hoc audit.
+#
+# NOTE for whoever revisits this: kratomnewstoday.com's own site template
+# (_includes/components/sources.njk, per agent-docs/components.md) ALREADY
+# renders a Sources section automatically from the `sources:` frontmatter array
+# on every briefing page. If a body-level `## Sources` heading is added to
+# satisfy this check, the live page will show the section TWICE. The sibling
+# Herald project governing-record hit this same shape and resolved it the other
+# way -- its rules.md explicitly forbids a body heading ("would render twice")
+# and relies on frontmatter-only rendering. Whether KNT's rules.md:37 should be
+# corrected to match that pattern, or whether sources.njk should be made to
+# skip rendering when a body section is already present, is an editorial/site
+# decision for Mike -- this check enforces rules.md exactly as currently
+# written and does not take a side.
+#
+# Prints "pass" or "violation: <reason>" on stdout.
+#
+# IMPORTANT: this always exits 0. Pass/fail is encoded ONLY in the printed
+# string ("pass" vs "violation: ..."), never in the process exit code. The
+# caller assigns the output via `sources_check=$(check_body_sources_section
+# ...)`, and this whole script runs under `set -euo pipefail` -- a non-zero
+# exit from a bare command substitution assignment (`var=$(cmd)`) trips
+# errexit and would silently kill the entire publish run the moment a
+# violation was found, which is exactly the opposite of "advisory, never
+# blocking." Keep this exiting 0 unconditionally.
+check_body_sources_section() {
+  local file="$1"
+  python3 - "$file" << 'PYEOF'
+import re, sys
+content = open(sys.argv[1]).read()
+# Strip YAML frontmatter (between the first pair of --- lines) to check the body only.
+body = re.sub(r'^---\n.*?\n---\n', '', content, count=1, flags=re.DOTALL)
+m = re.search(r'^##\s+Sources\s*$', body, re.MULTILINE)
+if not m:
+    print("violation: no '## Sources' heading found in the body (rules.md:37, non-negotiable)")
+    sys.exit(0)
+after = body[m.end():]
+# Must have at least one non-blank line (a source entry) before the next heading or EOF.
+next_heading = re.search(r'^##\s+', after, re.MULTILINE)
+section = after[:next_heading.start()] if next_heading else after
+if not any(line.strip() for line in section.splitlines()):
+    print("violation: '## Sources' heading present but the section is empty (rules.md:37)")
+    sys.exit(0)
+print("pass")
 PYEOF
 }
 
@@ -728,6 +799,7 @@ fi
 # the push/commit succeeded but the deploy failed, so the newsletter linked a 404).
 ARTICLES_JSON="[]"
 SLUGS=()
+declare -A RULES_WARNINGS   # slug -> violation message, populated below (advisory only, never blocks)
 while IFS= read -r f; do
   [ -z "$f" ] && continue
   slug=$(python3 -c "import re,sys; c=open(sys.argv[1]).read(); m=re.search(r'^slug:\s*\"?(.+?)\"?\s*\$', c, re.M); print(m.group(1) if m else '')" "$f" 2>/dev/null)
@@ -735,6 +807,15 @@ while IFS= read -r f; do
     slug=$(basename "$f" .md | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//')
   fi
   SLUGS+=("$slug")
+
+  # Advisory rules-check (Sources section, rules.md:37). LOUD, never blocking:
+  # logs a clear warning and records it for the Slack notification below, but
+  # the commit/push/deploy/email flow proceeds exactly as it would otherwise.
+  sources_check=$(check_body_sources_section "$f")
+  if [ "$sources_check" != "pass" ]; then
+    log "RULES WARNING: '$slug' -- $sources_check (advisory only, publish NOT blocked, see rules.md:37)"
+    RULES_WARNINGS["$slug"]="$sources_check"
+  fi
 
   # Email: append this briefing to the array (skip if its file can't be read).
   if article=$(extract_article_data "$slug"); then

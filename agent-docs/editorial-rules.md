@@ -29,7 +29,7 @@ Violations of these two rules trigger Herald's compliance check, which is config
 - Attribute statistics to specific sources ("a Nielsen report" not "data shows").
 - Describe what is being reported, not what is true.
 - Every briefing has a TL;DR, 2-3 sentences, standalone — provided via the `summary` frontmatter field, which renders as a callout at the top. Never repeat the TL;DR in the body (it would render twice).
-- Every briefing ends with a Sources section.
+- Every source lives in the `sources` frontmatter array (mandatory, non-negotiable); the template renders the Sources section from it automatically. No `## Sources` heading in the body — it would render twice.
 - Headlines describe what happened. Analysis goes in body, not headline.
 
 ## Forbidden link targets in editorial bodies

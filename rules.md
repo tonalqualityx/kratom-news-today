@@ -34,7 +34,7 @@ These constraints are enforced by the rules-check agent. Violations are flagged 
 
 4. **Always provide a TL;DR via the `summary` frontmatter field.** 2-3 sentences. Standalone — readable without the rest of the article. The headline plus the TL;DR should give the reader the gist of the story. The site renders `summary` as a TL;DR callout at the top of the page automatically — do NOT add a TL;DR heading or `**TL;DR:**` line in the body, or it will render twice.
 
-5. **Always end briefings with a Sources section.** Every primary source mentioned in the body appears in the Sources section with publisher, date, and URL. The Sources section is non-negotiable.
+5. **Sources are mandatory and live in the `sources` frontmatter array, not the body.** Every primary source mentioned in the body must appear as a structured entry in the `sources:` frontmatter array (title, url, publisher, published date) — this is non-negotiable; a briefing with an empty or incomplete `sources` array is incomplete. The site template (`_includes/components/sources.njk`) renders the Sources section on the page automatically from that array. Do NOT add a `## Sources` heading in the body — the template already renders one from frontmatter, and a body-level section would render twice.
 
 6. **Always front-load the news in headlines.** The most important fact comes first. Analysis frames, "what this means" framings, and editorial angles do not appear in headlines. Headlines describe what happened.
 

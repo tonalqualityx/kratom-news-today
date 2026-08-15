@@ -364,35 +364,39 @@ print(json.dumps({'title': fm('title'), 'summary': fm('summary'), 'url': url}))
 PYEOF
 }
 
-# --- Advisory rules-check: mandatory Sources section (rules.md:37) -----------
-# rules.md Required Framing 5: "Always end briefings with a Sources section...
-# non-negotiable." Herald's real rules-check agent has flagged this as a hard
-# violation on every one of the last several days' briefings (see
-# ~/.claude/skills/herald/logs/*.log) because the synthesis session omitted the
-# body-level `## Sources` heading, and nothing downstream of that check verdict
-# ever stopped the publish or made noise about it -- it just proceeded past
-# violations-found silently. This check catches the same condition
-# deterministically (no extra `claude -p` call, so it costs nothing and cannot
-# itself hang the publish) right before the "published" Slack notification, and
-# makes it LOUD instead of silent.
+# --- Advisory rules-check: mandatory Sources (rules.md:37) -------------------
+# rules.md Required Framing 5 (as of 2026-08-15, corrected to match the
+# governing-record precedent): sources are mandatory and live in the `sources`
+# frontmatter array -- kratomnewstoday.com's site template
+# (_includes/components/sources.njk, per agent-docs/components.md) renders the
+# Sources section on the page automatically from that array. A body-level
+# `## Sources` heading must NOT be added; the template already renders one,
+# and a body-level section would render twice.
 #
-# ADVISORY ONLY, by design (Mike explicitly deferred fail-closed for this rule):
-# a failing check here NEVER blocks the commit/push/deploy/email that already
-# happened earlier in the run -- it only adds a visible warning to the log and
-# to the per-briefing Slack notification, same as any other post-hoc audit.
+# History: this rule used to read "always end briefings with a body-level
+# Sources section," and Herald's real rules-check agent flagged nearly every
+# recent briefing as a hard violation for lacking one (see
+# ~/.claude/skills/herald/logs/*.log) -- but the site was never actually
+# missing sources; the rule was simply written wrong for this template. Fixed
+# 2026-08-15 by correcting rules.md to the frontmatter-only pattern instead of
+# forcing synthesis to add a body section (which would have started
+# double-rendering Sources on every future briefing). This check was updated
+# to match -- see git log for the prior (now-obsolete) version that checked
+# for a body heading instead of flagging one.
 #
-# NOTE for whoever revisits this: kratomnewstoday.com's own site template
-# (_includes/components/sources.njk, per agent-docs/components.md) ALREADY
-# renders a Sources section automatically from the `sources:` frontmatter array
-# on every briefing page. If a body-level `## Sources` heading is added to
-# satisfy this check, the live page will show the section TWICE. The sibling
-# Herald project governing-record hit this same shape and resolved it the other
-# way -- its rules.md explicitly forbids a body heading ("would render twice")
-# and relies on frontmatter-only rendering. Whether KNT's rules.md:37 should be
-# corrected to match that pattern, or whether sources.njk should be made to
-# skip rendering when a body section is already present, is an editorial/site
-# decision for Mike -- this check enforces rules.md exactly as currently
-# written and does not take a side.
+# ADVISORY ONLY, by design (Mike explicitly deferred fail-closed for this
+# rule): a failing check here NEVER blocks the commit/push/deploy/email that
+# already happened earlier in the run -- it only adds a visible warning to the
+# log and to the per-briefing Slack notification, same as any other post-hoc
+# audit.
+#
+# Checks, in order:
+#   1. The `sources` frontmatter array exists and is non-empty (the actual
+#      mandatory-sources requirement).
+#   2. Every entry in it has title/url/publisher (matches rules.md:37's
+#      "publisher, date, and URL" and validate.js's existing field checks).
+#   3. The body does NOT contain a `## Sources` heading (double-render risk --
+#      the template already renders one from frontmatter).
 #
 # Prints "pass" or "violation: <reason>" on stdout.
 #
@@ -408,20 +412,42 @@ check_body_sources_section() {
   local file="$1"
   python3 - "$file" << 'PYEOF'
 import re, sys
-content = open(sys.argv[1]).read()
-# Strip YAML frontmatter (between the first pair of --- lines) to check the body only.
-body = re.sub(r'^---\n.*?\n---\n', '', content, count=1, flags=re.DOTALL)
-m = re.search(r'^##\s+Sources\s*$', body, re.MULTILINE)
+import yaml
+
+raw = open(sys.argv[1]).read()
+m = re.match(r'^---\n(.*?)\n---\n(.*)$', raw, re.DOTALL)
 if not m:
-    print("violation: no '## Sources' heading found in the body (rules.md:37, non-negotiable)")
+    print("violation: could not find YAML frontmatter delimiters ('---') to check sources")
     sys.exit(0)
-after = body[m.end():]
-# Must have at least one non-blank line (a source entry) before the next heading or EOF.
-next_heading = re.search(r'^##\s+', after, re.MULTILINE)
-section = after[:next_heading.start()] if next_heading else after
-if not any(line.strip() for line in section.splitlines()):
-    print("violation: '## Sources' heading present but the section is empty (rules.md:37)")
+fm_text, body = m.group(1), m.group(2)
+
+try:
+    fm = yaml.safe_load(fm_text) or {}
+except yaml.YAMLError as exc:
+    print(f"violation: frontmatter did not parse as YAML ({exc})")
     sys.exit(0)
+
+sources = fm.get('sources')
+if not sources or not isinstance(sources, list) or len(sources) == 0:
+    print("violation: 'sources' frontmatter array is missing or empty -- sources are "
+          "mandatory (rules.md:37)")
+    sys.exit(0)
+
+incomplete = [
+    i + 1 for i, s in enumerate(sources)
+    if not (isinstance(s, dict) and s.get('title') and s.get('url') and s.get('publisher'))
+]
+if incomplete:
+    print(f"violation: 'sources' frontmatter entries missing title/url/publisher "
+          f"(entry index {incomplete}, rules.md:37)")
+    sys.exit(0)
+
+if re.search(r'^##\s+Sources\s*$', body, re.MULTILINE):
+    print("violation: body contains a '## Sources' heading -- the site template already "
+          "renders Sources from frontmatter (sources.njk); this will double-render on the "
+          "live page (rules.md:37)")
+    sys.exit(0)
+
 print("pass")
 PYEOF
 }

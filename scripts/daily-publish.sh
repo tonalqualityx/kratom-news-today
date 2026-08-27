@@ -9,9 +9,15 @@ LOG_DIR="/home/mike/.local/log"
 LOG_FILE="$LOG_DIR/knt-herald-$(date +%Y-%m-%d).log"
 SLACK_CHANNEL="C0AEBQ36W05"  # #bast-chat
 SITE_URL="https://kratomnewstoday.com"
-RESEARCH_TIMEOUT=1200  # hard cap for the Python research phase (Perplexity); research runs ~550-670s.
+# Research wall-clock. Raised 1200 -> 2400 on 2026-08-27. The old 1200 was set in
+# June when research ran 550-670s; by late August it ran 680-1170s (denoise cap had
+# been raised 80 -> 250, so far more queries land), leaving almost no headroom.
+# It blew the wall on 08-19 and 08-27, and came within 34s on 08-20 and 64s on 08-22.
+RESEARCH_TIMEOUT=2400
+RESEARCH_ATTEMPTS=2    # research retries too now; a single slow-API morning used to kill the day.
+RESEARCH_RETRY_DELAY=60
 PUBLISH_TIMEOUT=1800   # hard wall-clock cap for the claude SYNTHESIS+publish step (30 min).
-MAX_ATTEMPTS=2         # synthesis attempts if no briefing lands (research runs once, up front).
+MAX_ATTEMPTS=2         # synthesis attempts if no briefing lands.
 HERALD_DIR="/home/mike/.claude/skills/herald"
 
 # --- Deploy-watch / liveness config ---
@@ -618,15 +624,31 @@ log "Claude CLI auth OK."
 # design: the agent used to background this ~10-minute call and end its turn
 # before ever synthesizing. The shell just blocks on it normally.
 RESEARCH_FILE=$(mktemp "/tmp/knt-research-$(date +%Y%m%d)-XXXXXX.json")
-log "Running Herald research (Python/Perplexity, up to ${RESEARCH_TIMEOUT}s)..."
-set +e
-timeout -k 30 "$RESEARCH_TIMEOUT" "$HERALD_DIR/.venv/bin/python" "$HERALD_DIR/run_phase.py" \
-  research --config-dir "$REPO_DIR" > "$RESEARCH_FILE" 2>>"$LOG_FILE"
-research_rc=$?
-set -e
+# Research gets RESEARCH_ATTEMPTS tries. It used to get exactly one, so a single
+# slow-API morning killed the whole day's briefing with no second chance --
+# that is what lost 2026-08-19 and 2026-08-27, both rc=124 at the wall.
+research_rc=1
+for attempt in $(seq 1 "$RESEARCH_ATTEMPTS"); do
+  log "Running Herald research (Python/Perplexity, attempt ${attempt}/${RESEARCH_ATTEMPTS}, up to ${RESEARCH_TIMEOUT}s)..."
+  set +e
+  timeout -k 30 "$RESEARCH_TIMEOUT" "$HERALD_DIR/.venv/bin/python" "$HERALD_DIR/run_phase.py" \
+    research --config-dir "$REPO_DIR" > "$RESEARCH_FILE" 2>>"$LOG_FILE"
+  research_rc=$?
+  set -e
+  [ "$research_rc" -eq 0 ] && break
+  if [ "$research_rc" -eq 124 ]; then
+    log "WARNING: research attempt ${attempt} timed out at ${RESEARCH_TIMEOUT}s (rc=124)."
+  else
+    log "WARNING: research attempt ${attempt} failed (rc=${research_rc})."
+  fi
+  if [ "$attempt" -lt "$RESEARCH_ATTEMPTS" ]; then
+    log "Retrying research after ${RESEARCH_RETRY_DELAY}s..."
+    sleep "$RESEARCH_RETRY_DELAY"
+  fi
+done
 if [ "$research_rc" -ne 0 ]; then
-  log "ERROR: research phase failed (rc=$research_rc) or timed out."
-  slack_notify "⚠ KNT daily publish FAILED: research phase errored (rc=$research_rc). Check $LOG_FILE"
+  log "ERROR: research phase failed (rc=$research_rc) or timed out after ${RESEARCH_ATTEMPTS} attempt(s)."
+  slack_notify "⚠ KNT daily publish FAILED: research phase errored (rc=$research_rc) after ${RESEARCH_ATTEMPTS} attempts. Check $LOG_FILE"
   exit 1
 fi
 RSTATUS=$(python3 -c "import json; print(json.load(open('$RESEARCH_FILE')).get('status','?'))" 2>/dev/null || echo "?")

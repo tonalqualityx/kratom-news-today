@@ -53,6 +53,8 @@ Editorial article bodies do NOT link to:
 - Any checkout or purchase flow
 - Competitor commercial pages (MIT45, OPMS, Kratom Spot, etc. — same rule applies to all)
 - Affiliate links, tracked promotional links, or any URL with affiliate parameters
+
+Store-link tagging is automatic. Every link to herbapumps.com anywhere on the site (the sponsored units, the footer publisher line, the About page) gets `utm_source=kratomnewstoday`, `utm_medium=referral`, `utm_campaign=<page slug>` and `utm_content=<placement>` stamped at build time by `lib/utm-links.js`. Never hand-write `utm_*` on a store link; the build replaces whatever is there. A new sponsored unit sets its placement with `data-utm-content="..."` on the `<a>`.
 - Direct-to-consumer pages of any kind
 
 Editorial article bodies DO link to:

@@ -333,6 +333,13 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.ignores.add("research.md.bak");
 
   // ---------------------------------------------------------------------------
+  // Outbound store links: stamp utm_* on every herbapumps.com anchor at build
+  // time (lib/utm-links.js). Hand-written utm params are replaced; placement
+  // comes from data-utm-content on the <a>, campaign from the page URL.
+  // ---------------------------------------------------------------------------
+  eleventyConfig.addTransform("utmLinks", require("./lib/utm-links")({ source: "kratomnewstoday" }));
+
+  // ---------------------------------------------------------------------------
   // Directory config
   // ---------------------------------------------------------------------------
   return {

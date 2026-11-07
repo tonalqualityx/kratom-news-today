@@ -17,7 +17,8 @@ The publication's overall positioning ("report what is being reported, attribute
 ### Headline
 - Front-loads the news. "FDA Recommends Schedule I Classification for 7-Hydroxymitragynine" not "What FDA's Move Means."
 - Specific, factual, no clickbait.
-- 50-70 characters target (mobile-friendly, fits in search snippets).
+- Target 65 characters, firm cap 70, stretch to 80 only when unavoidable; over 80 fails `scripts/validate.js` (Mike, 2026-11-07). The headline is also the newsletter subject line.
+- One fact. Outlet credit, secondary numbers, and conditions go in the summary, never the headline.
 
 ### TL;DR / Summary
 - 2-3 sentences. Standalone. Quotable.

@@ -51,6 +51,7 @@ Read the draft file Herald produced. Verify:
 - All inline reference-style links resolve to slugs that exist in `related_briefings`
 - All slugs in `related_briefings` correspond to either existing files in `./content/briefings/` or to other valid slugs in the recent past
 - The TL;DR in `summary` is 2-3 sentences and standalone
+- The `title` is 80 characters or fewer (target 65, firm cap 70). If it is longer, rewrite it to rules.md rule 6 (one fact, no outlet credit), set the same text in the H1 if the body has one, and re-check. A long title is fixed here, not escalated; `scripts/validate.js` fails any briefing dated 2026-11-08 or later with a title over 80.
 
 If validation fails, log the specific failure, leave the draft in `./drafts/`, and notify Mike. Do not continue.
 

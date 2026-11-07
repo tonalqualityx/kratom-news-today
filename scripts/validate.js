@@ -5,6 +5,9 @@ const matter = require('gray-matter');
 const BRIEFINGS_DIR = path.join(__dirname, '..', 'content', 'briefings');
 const REQUIRED_FIELDS = ['title', 'slug', 'date', 'summary', 'tags', 'sources', 'related_briefings'];
 const VALID_BEATS = ['regulation', 'business', 'science'];
+const TITLE_FIRM_CAP = 70;
+const TITLE_HARD_MAX = 80;
+const TITLE_RULE_START = '2026-11-08';
 
 let errors = [];
 let fileCount = 0;
@@ -47,6 +50,20 @@ files.forEach(file => {
 // Validate each file
 fileDataMap.forEach((data, file) => {
   fileCount++;
+
+  // Title length (rules.md rule 6, Mike 2026-11-07): target 65, firm cap 70,
+  // stretch to 80; over 80 fails. Briefings dated before 2026-11-08 predate the
+  // rule and only warn, so the archive keeps building.
+  if (typeof data.title === 'string') {
+    const len = data.title.trim().length;
+    const dated = String(file.match(/^(\d{4}-\d{2}-\d{2})-/)?.[1] || '');
+    const grandfathered = dated && dated < TITLE_RULE_START;
+    if (len > TITLE_HARD_MAX && !grandfathered) {
+      errors.push(`${file}: Title is ${len} characters; the limit is ${TITLE_HARD_MAX} (target 65, firm cap 70). Keep the one most important fact; move the outlet, numbers, and conditions to the summary.`);
+    } else if (len > TITLE_FIRM_CAP && !grandfathered) {
+      console.warn(`${file}: Title is ${len} characters, over the firm cap of ${TITLE_FIRM_CAP} (allowed up to ${TITLE_HARD_MAX} only when the subject cannot be named shorter).`);
+    }
+  }
 
   // Check required fields
   REQUIRED_FIELDS.forEach(field => {

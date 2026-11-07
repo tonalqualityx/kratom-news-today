@@ -31,6 +31,7 @@ Violations of these two rules trigger Herald's compliance check, which is config
 - Every briefing has a TL;DR, 2-3 sentences, standalone — provided via the `summary` frontmatter field, which renders as a callout at the top. Never repeat the TL;DR in the body (it would render twice).
 - Every source lives in the `sources` frontmatter array (mandatory, non-negotiable); the template renders the Sources section from it automatically. No `## Sources` heading in the body — it would render twice.
 - Headlines describe what happened. Analysis goes in body, not headline.
+- Headlines carry one fact: target 65 characters, firm cap 70, 80 only when unavoidable. No outlet credit in the headline; it goes in the summary and sources (rules.md rule 6).
 
 ## Forbidden link targets in editorial bodies
 

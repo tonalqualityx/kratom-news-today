@@ -3,6 +3,7 @@ title: "The State of Kratom Regulation: 2026 Midyear Report"
 slug: "state-of-kratom-regulation-2026"
 date: 2026-06-12
 generated_at: "2026-06-12T13:30:00Z"
+date_modified: 2026-11-09
 type: report
 summary: "As of June 2026, seven states ban kratom outright and Tennessee becomes the eighth on July 1, while 30 states and the District of Columbia regulate the plant in some form, according to the Legislative Analysis and Public Policy Association. The FDA has recommended that the DEA schedule concentrated 7-hydroxymitragynine products while explicitly distinguishing them from natural leaf kratom, and the DEA's review remains pending. This report maps the federal posture, the state patchwork, the courts, and the enforcement wave reshaping the United States kratom market at midyear."
 report_number: "KNT-R-2026-01"
@@ -249,6 +250,8 @@ herald_options_snapshot:
   source_count_target: 8
   embedding_model: "text-embedding-3-small"
 ---
+
+*Update, November 9, 2026: [The State of Kratom Regulation: 2026 Year-End Report](/reports/state-of-kratom-regulation-2026-year-end/) is now available, with all 50 states and the District of Columbia. It corrects this edition's entries for Georgia (HB 181 is a 2024 law effective January 1, 2025), North Carolina (no statewide law was enacted), New York (the under-21 and labeling laws were signed December 22, 2025), South Dakota (already regulated under 2025's HB 1056), Michigan (the House vote was March 18) and Kansas (HB 2365 schedules 7-OH and does not name kratom leaf).*
 
 Halfway through 2026, kratom regulation in the United States has reached its most active period since the DEA's withdrawn 2016 scheduling attempt. Seven states ban the plant outright, and Tennessee becomes the eighth on July 1. Thirty states and the District of Columbia regulate kratom in some form, according to the [Legislative Analysis and Public Policy Association's summary of state laws](https://legislativeanalysis.org/kratom-summary-of-state-laws/). The FDA has [recommended that the DEA schedule concentrated 7-hydroxymitragynine products](https://www.fda.gov/news-events/press-announcements/fda-takes-steps-restrict-7-oh-opioid-products-threatening-american-consumers) while explicitly exempting natural leaf, and the DEA's review remains open. And Rhode Island became the first state to reverse a ban.
 

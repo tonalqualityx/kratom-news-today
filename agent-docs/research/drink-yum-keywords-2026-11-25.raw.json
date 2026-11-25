@@ -1,0 +1,566 @@
+{
+ "pulled": "2026-11-25",
+ "source": "DataForSEO via kwdata.py both (Google Ads search volume, Labs keyword difficulty), US, English",
+ "rows": [
+  {
+   "keyword": "drink yum",
+   "search_volume": 10,
+   "cpc": null,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "drinkyum",
+   "search_volume": 10,
+   "cpc": null,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "drink yum kratom",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "drink yum review",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "drinkyum.com",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom shot",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 25,
+   "refused": null
+  },
+  {
+   "keyword": "kratom shots",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 25,
+   "refused": null
+  },
+  {
+   "keyword": "kratom extract shot",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 7,
+   "refused": null
+  },
+  {
+   "keyword": "kratom drink",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 67,
+   "refused": null
+  },
+  {
+   "keyword": "kratom drinks",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 67,
+   "refused": null
+  },
+  {
+   "keyword": "kratom beverage",
+   "search_volume": 14800,
+   "cpc": 1.64,
+   "competition": "MEDIUM",
+   "keyword_difficulty": 3,
+   "refused": null
+  },
+  {
+   "keyword": "botanical drink",
+   "search_volume": 480,
+   "cpc": 1.93,
+   "competition": "HIGH",
+   "keyword_difficulty": 0,
+   "refused": null
+  },
+  {
+   "keyword": "kratom bubblegum",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom free sample",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom affiliate program",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 9,
+   "refused": null
+  },
+  {
+   "keyword": "kava bar",
+   "search_volume": 40500,
+   "cpc": 0.57,
+   "competition": "LOW",
+   "keyword_difficulty": 6,
+   "refused": null
+  },
+  {
+   "keyword": "kratom vs alcohol",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 0,
+   "refused": null
+  },
+  {
+   "keyword": "kratom alternative to alcohol",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom for energy",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 62,
+   "refused": null
+  },
+  {
+   "keyword": "kratom extract",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 63,
+   "refused": null
+  },
+  {
+   "keyword": "mitragynine",
+   "search_volume": 27100,
+   "cpc": 5.25,
+   "competition": "LOW",
+   "keyword_difficulty": 46,
+   "refused": null
+  },
+  {
+   "keyword": "kratom smoke shop",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "nubrew",
+   "search_volume": 110,
+   "cpc": 3.53,
+   "competition": "HIGH",
+   "keyword_difficulty": 1,
+   "refused": null
+  },
+  {
+   "keyword": "kratom tropical shot",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "is kratom legal",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 41,
+   "refused": null
+  },
+  {
+   "keyword": "kratom for social anxiety",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 19,
+   "refused": null
+  },
+  {
+   "keyword": "kratom lab tested",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 0,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh ban",
+   "search_volume": 18100,
+   "cpc": 13.25,
+   "competition": "LOW",
+   "keyword_difficulty": 12,
+   "refused": null
+  },
+  {
+   "keyword": "7oh ban",
+   "search_volume": 18100,
+   "cpc": 13.25,
+   "competition": "LOW",
+   "keyword_difficulty": 26,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh vs kratom",
+   "search_volume": 1600,
+   "cpc": 4.14,
+   "competition": "LOW",
+   "keyword_difficulty": 17,
+   "refused": null
+  },
+  {
+   "keyword": "7oh vs kratom",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "what is 7oh",
+   "search_volume": 33100,
+   "cpc": 7.34,
+   "competition": "LOW",
+   "keyword_difficulty": 26,
+   "refused": null
+  },
+  {
+   "keyword": "what is 7-oh",
+   "search_volume": 33100,
+   "cpc": 7.34,
+   "competition": "LOW",
+   "keyword_difficulty": 26,
+   "refused": null
+  },
+  {
+   "keyword": "is 7-oh legal",
+   "search_volume": 720,
+   "cpc": 3.5,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7-hydroxymitragynine",
+   "search_volume": 40500,
+   "cpc": 7.3,
+   "competition": "LOW",
+   "keyword_difficulty": 39,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh",
+   "search_volume": 165000,
+   "cpc": 6.05,
+   "competition": "LOW",
+   "keyword_difficulty": 28,
+   "refused": null
+  },
+  {
+   "keyword": "7oh",
+   "search_volume": 165000,
+   "cpc": 6.05,
+   "competition": "LOW",
+   "keyword_difficulty": 28,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh fda",
+   "search_volume": 50,
+   "cpc": null,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh schedule i",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7oh legal",
+   "search_volume": 170,
+   "cpc": 19.63,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "natural 7-oh",
+   "search_volume": 70,
+   "cpc": null,
+   "competition": "MEDIUM",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh kratom",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 43,
+   "refused": null
+  },
+  {
+   "keyword": "synthetic 7-oh",
+   "search_volume": 1300,
+   "cpc": 10.99,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh dea",
+   "search_volume": 110,
+   "cpc": null,
+   "competition": "LOW",
+   "keyword_difficulty": 13,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh vs mitragynine",
+   "search_volume": 260,
+   "cpc": 3.01,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh gas station",
+   "search_volume": 170,
+   "cpc": null,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh pills",
+   "search_volume": 4400,
+   "cpc": 4.64,
+   "competition": "LOW",
+   "keyword_difficulty": 25,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh tablets",
+   "search_volume": 6600,
+   "cpc": 4.26,
+   "competition": "MEDIUM",
+   "keyword_difficulty": 18,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh federal ban",
+   "search_volume": 110,
+   "cpc": null,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh banned",
+   "search_volume": 170,
+   "cpc": null,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7oh fda ban",
+   "search_volume": 10,
+   "cpc": null,
+   "competition": "LOW",
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "7-oh scheduling",
+   "search_volume": 140,
+   "cpc": 18.47,
+   "competition": "LOW",
+   "keyword_difficulty": 33,
+   "refused": null
+  },
+  {
+   "keyword": "kratom ban",
+   "search_volume": 22200,
+   "cpc": 2.49,
+   "competition": "LOW",
+   "keyword_difficulty": 18,
+   "refused": null
+  },
+  {
+   "keyword": "is 7-oh kratom",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom extract drink",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom energy shot",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "best kratom shots",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom drink brands",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom tonic",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom kava bar",
+   "search_volume": 1900,
+   "cpc": 0.23,
+   "competition": "LOW",
+   "keyword_difficulty": 0,
+   "refused": null
+  },
+  {
+   "keyword": "mitragynine extract",
+   "search_volume": 260,
+   "cpc": 3.59,
+   "competition": "MEDIUM",
+   "keyword_difficulty": 20,
+   "refused": null
+  },
+  {
+   "keyword": "kratom and alcohol",
+   "search_volume": 1600,
+   "cpc": 0.22,
+   "competition": "LOW",
+   "keyword_difficulty": 0,
+   "refused": null
+  },
+  {
+   "keyword": "kratom lab report",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom coa",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom brands",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 7,
+   "refused": null
+  },
+  {
+   "keyword": "kratom",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": 68,
+   "refused": null
+  },
+  {
+   "keyword": "kratom news",
+   "search_volume": 1300,
+   "cpc": 4.08,
+   "competition": "LOW",
+   "keyword_difficulty": 36,
+   "refused": null
+  },
+  {
+   "keyword": "kratom drink recipe",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "ready to drink kratom",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  },
+  {
+   "keyword": "kratom shot near me",
+   "search_volume": null,
+   "cpc": null,
+   "competition": null,
+   "keyword_difficulty": null,
+   "refused": null
+  }
+ ]
+}

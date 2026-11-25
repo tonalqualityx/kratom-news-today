@@ -5,7 +5,8 @@ layout: layouts/base.njk
 {% block content %}
 <article class="opinion">
   <header class="opinion-header">
-    <span class="content-type-label">Opinion</span>
+    <span class="content-type-label">{{ content_label or "Opinion" }}</span>
+    {% if section_title %}<a href="/{{ section }}/" class="section-link">{{ section_title }}</a>{% endif %}
     <h1>{{ title }}</h1>
     <div class="opinion-meta">
       <span class="byline">By {{ author or site.author }}</span>

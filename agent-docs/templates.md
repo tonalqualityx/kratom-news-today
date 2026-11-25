@@ -36,7 +36,7 @@ Layout for individual briefing articles. Extends `base.njk`. Includes:
 - Schema markup: NewsArticle, with full structured data including author, publisher, datePublished, dateModified, headline, description, image (the OG image), citation array (from sources)
 
 ### `opinion.njk` (phase 2 — placeholder for launch)
-Layout for opinion pieces. Extends `base.njk`. Will include similar structure to briefing.njk but with author byline support and looser editorial framing. Not active at launch; creates the file as an empty/stub template so the framework is ready.
+Layout for opinion pieces. Extends `base.njk`. Will include similar structure to briefing.njk but with author byline support and looser editorial framing. Now used by Industry Perspective posts (`content/industry-perspective/`): shows `content_label` (default "Opinion") and a link back to the section when `section_title` is set.
 
 ### `beat.njk`
 Layout for beat archive pages (Regulation, Business, Science). Extends `base.njk`. Includes:

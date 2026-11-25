@@ -1,0 +1,15 @@
+---
+layout: layouts/beat.njk
+title: Industry Perspective
+beatName: Industry Perspective
+beatSlug: industry-perspective
+beatDescription: "Interviews and opinion from people working in the kratom industry. Separate from our news coverage."
+emptyText: "No interviews or opinion pieces yet. Check back soon."
+description: "Interviews and opinion from people in the kratom industry: founders, makers, retailers and researchers, in their own words."
+pagination:
+  data: collections.industryPerspective
+  size: 10
+  alias: posts
+  generatePageOnEmptyData: true
+permalink: "industry-perspective/{% if pagination.pageNumber > 0 %}page/{{ pagination.pageNumber + 1 }}/{% endif %}index.html"
+---

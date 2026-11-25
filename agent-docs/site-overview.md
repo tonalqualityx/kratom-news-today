@@ -45,7 +45,7 @@ Detailed editorial rules live in `rules.md` and are enforced by Herald's check a
 
 ## What's in this repo
 
-Source content in `./content/briefings/` (and eventually `./content/opinions/` when phase 2 launches). Drafts awaiting publish in `./drafts/`. Herald's vector index in `./.herald/` (gitignored). Eleventy site infrastructure: configuration in `.eleventy.js`, templates in `./_includes/`, components in `./_includes/components/`, source files in `./src/`. GitHub Actions workflow in `.github/workflows/`. Agent documentation in `./agent-docs/`.
+Source content in `./content/briefings/` (news), `./content/industry-perspective/` (interviews and opinion; see Industry Perspective below) (and eventually `./content/opinions/` when phase 2 launches). Drafts awaiting publish in `./drafts/`. Herald's vector index in `./.herald/` (gitignored). Eleventy site infrastructure: configuration in `.eleventy.js`, templates in `./_includes/`, components in `./_includes/components/`, source files in `./src/`. GitHub Actions workflow in `.github/workflows/`. Agent documentation in `./agent-docs/`.
 
 ## Things this site is NOT
 
@@ -62,3 +62,7 @@ Coverage that drifts toward any of these is a violation of the publication's edi
 - 7-OH coverage in particular requires precision. Three different things often get conflated and the publication distinguishes them carefully: 7-OH as it occurs naturally in trace amounts in raw leaf; 7-OH in concentrated extracts; synthetic 7-OH preparations.
 - Herba Releaf is covered like any other industry company. No preferential treatment, no protection from unfavorable coverage if it arises. The credibility of the publication and the defensibility of the disclosed publisher relationship depend on this.
 - Payment processor and platform risk (BRAM, banking, ad networks) is a high-velocity beat for this industry. Cover it journalistically; do not create exposure through framing.
+
+## Industry Perspective
+
+Interviews and opinion live in `./content/industry-perspective/*.md`, apart from straight news. They publish at `/industry-perspective/<slug>/` (directory data file `industry-perspective.json`), use `layout: "opinion"`, and are listed on `/industry-perspective/` with their own feed at `/industry-perspective/feed.xml`. Collection: `collections.industryPerspective`. They must NOT carry the `regulation`, `business` or `science` tags and are never placed in `content/briefings/`, so they stay out of `/feed.xml`, the beat feeds, the homepage, the archive, `/news-sitemap.xml` and the email briefing (which only reads `content/briefings/`). They do appear in `/sitemap.xml` and search. Unpublished drafts carry `draft: true`, `permalink: false` and `eleventyExcludeFromCollections: true`; the publish step removes those three lines. Required frontmatter: title, slug, date, summary; also `section`, `section_title`, `content_label` ("Interview" or "Opinion"), `author`.

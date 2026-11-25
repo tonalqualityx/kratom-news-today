@@ -120,6 +120,21 @@ fileDataMap.forEach((data, file) => {
   }
 });
 
+// Industry Perspective guard: interviews and opinion must stay out of the news beats.
+const IP_DIR = path.join(__dirname, '..', 'content', 'industry-perspective');
+if (fs.existsSync(IP_DIR)) {
+  fs.readdirSync(IP_DIR).filter(f => f.endsWith('.md')).forEach(file => {
+    const { data } = matter(fs.readFileSync(path.join(IP_DIR, file), 'utf8'));
+    if (data.draft === true || data.permalink === false) return;
+    ['title', 'slug', 'date', 'summary'].forEach(field => {
+      if (!data[field]) errors.push(`industry-perspective/${file}: Missing required field "${field}"`);
+    });
+    (data.tags || []).filter(t => VALID_BEATS.includes(t)).forEach(t => {
+      errors.push(`industry-perspective/${file}: Must not carry news beat tag "${t}"`);
+    });
+  });
+}
+
 console.log(`Validated ${fileCount} briefing file(s).`);
 
 if (errors.length > 0) {

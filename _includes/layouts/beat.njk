@@ -23,7 +23,7 @@ layout: layouts/base.njk
     {% endfor %}
 
     {% if not posts or posts.length == 0 %}
-    <p class="empty-state">No briefings in this beat yet. Check back soon.</p>
+    <p class="empty-state">{{ emptyText or "No briefings in this beat yet. Check back soon." }}</p>
     {% endif %}
   </div>
 

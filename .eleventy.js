@@ -80,6 +80,13 @@ module.exports = function (eleventyConfig) {
       .sort((a, b) => b.date - a.date);
   });
 
+  // Interviews and opinion. Kept out of every news collection on purpose.
+  eleventyConfig.addCollection("industryPerspective", (collectionApi) => {
+    return collectionApi
+      .getFilteredByGlob("./content/industry-perspective/*.md")
+      .sort((a, b) => b.date - a.date);
+  });
+
   eleventyConfig.addCollection("reports", (collectionApi) => {
     return collectionApi
       .getFilteredByGlob("./content/reports/*.md")

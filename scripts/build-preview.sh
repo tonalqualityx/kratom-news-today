@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Private preview build: renders unpublished Industry Perspective drafts, no
-# tracking, noindex everywhere. Usage: scripts/build-preview.sh [ABS_OUTPUT_DIR]
+# tracking, noindex everywhere (crawlers allowed so they can read it). Usage: scripts/build-preview.sh [ABS_OUTPUT_DIR]
 # Default output: <repo>/_preview. Never modifies tracked files.
 set -euo pipefail
 
@@ -16,6 +16,8 @@ find "$OUT" -mindepth 1 -delete
 cd "$REPO"
 KNT_PREVIEW=1 KNT_OUT="$OUT" npx @11ty/eleventy
 
-printf 'User-agent: *\nDisallow: /\n' > "$OUT/robots.txt"
+# Crawlers must be allowed to fetch pages, or they never see the noindex
+# header and meta tag and can still list a discovered URL.
+printf 'User-agent: *\nAllow: /\n' > "$OUT/robots.txt"
 printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > "$OUT/_headers"
 echo "Preview built in $OUT"

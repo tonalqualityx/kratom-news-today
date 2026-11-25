@@ -10,3 +10,4 @@ src/assets/og-images/*
 *.log
 .DS_Store
 knt-herald.zip
+_preview/

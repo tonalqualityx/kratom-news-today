@@ -7,6 +7,12 @@ const crypto = require("crypto");
 const esbuild = require("esbuild");
 const Image = require("@11ty/eleventy-img");
 
+// Preview build (scripts/build-preview.sh): KNT_PREVIEW=1 renders unpublished
+// industry-perspective drafts, strips tracking, and marks every page noindex.
+// KNT_OUT overrides the output dir. Neither is set in the normal build.
+const PREVIEW = process.env.KNT_PREVIEW === "1";
+const OUT = process.env.KNT_OUT || "_site";
+
 module.exports = function (eleventyConfig) {
   // ---------------------------------------------------------------------------
   // Plugins
@@ -240,6 +246,7 @@ module.exports = function (eleventyConfig) {
   };
   const assetManifest = {};
   eleventyConfig.addGlobalData("asset", () => assetManifest);
+  eleventyConfig.addGlobalData("preview", PREVIEW);
 
   eleventyConfig.on("eleventy.before", async () => {
     for (const k of Object.keys(assetManifest)) delete assetManifest[k];
@@ -252,7 +259,7 @@ module.exports = function (eleventyConfig) {
       const hash = crypto.createHash("sha256").update(code).digest("hex").slice(0, 10);
       const ext = path.extname(src);
       const rel = (ext === ".js" ? "js/" : "") + path.basename(src, ext) + "." + hash + ext;
-      const dest = path.join("_site/assets", rel);
+      const dest = path.join(OUT, "assets", rel);
       fs.mkdirSync(path.dirname(dest), { recursive: true });
       fs.writeFileSync(dest, code);
       assetManifest[key] = "/assets/" + rel;
@@ -264,18 +271,18 @@ module.exports = function (eleventyConfig) {
   // images/fonts get a month, HTML always revalidates.
   eleventyConfig.on("eleventy.after", async () => {
     for (const src of Object.values(ASSET_ENTRIES)) {
-      const raw = path.join("_site/assets", src.replace(/^src\/assets\//, ""));
+      const raw = path.join(OUT, "assets", src.replace(/^src\/assets\//, ""));
       if (fs.existsSync(raw)) fs.unlinkSync(raw);
     }
     // Ship only the responsive variants; drop the full-size ad sources that
     // passthrough copied into the output.
-    const adsDir = "_site/assets/ads";
+    const adsDir = path.join(OUT, "assets/ads");
     if (fs.existsSync(adsDir)) {
       for (const f of fs.readdirSync(adsDir)) {
         if (/^herba-[a-z-]+\.webp$/.test(f)) fs.unlinkSync(path.join(adsDir, f));
       }
     }
-    fs.writeFileSync(path.join("_site", ".htaccess"), [
+    fs.writeFileSync(path.join(OUT, ".htaccess"), [
       "<IfModule mod_headers.c>",
       "  # Content-hashed CSS/JS: safe to cache forever (a change yields a new filename)",
       '  <FilesMatch "\\.[0-9a-f]{10}\\.(css|js)$">',
@@ -304,7 +311,7 @@ module.exports = function (eleventyConfig) {
     const metadata = await Image(path.join("src/assets/ads", file), {
       widths: opts.widths || [200, 400, 600, 900],
       formats: ["webp"],
-      outputDir: "_site/assets/ads/",
+      outputDir: OUT + "/assets/ads/",
       urlPath: "/assets/ads/",
     });
     const attrs = { alt: alt || "", sizes: opts.sizes || "100vw", loading: opts.loading || "lazy", decoding: "async" };
@@ -346,6 +353,17 @@ module.exports = function (eleventyConfig) {
   // ---------------------------------------------------------------------------
   eleventyConfig.addTransform("utmLinks", require("./lib/utm-links")({ source: "kratomnewstoday" }));
 
+  // Preview only: noindex on every page, newsletter form disabled, small banner.
+  if (PREVIEW) {
+    eleventyConfig.addTransform("previewMarkup", function (content) {
+      if (!(this.page.outputPath || "").endsWith(".html")) return content;
+      return content
+        .replace("<head>", '<head>\n  <meta name="robots" content="noindex, nofollow">')
+        .replace(/action="https:\/\/a\.klaviyo\.com\/client\/subscriptions\/"/g, 'action="#"')
+        .replace(/<body([^>]*)>/, '<body$1>\n  <div style="background:#fff3cd;color:#664d03;font:14px/1.4 sans-serif;padding:6px 12px;text-align:center">Preview: not published</div>');
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Directory config
   // ---------------------------------------------------------------------------
@@ -354,7 +372,7 @@ module.exports = function (eleventyConfig) {
       input: ".",
       includes: "_includes",
       data: "_data",
-      output: "_site",
+      output: OUT,
     },
     markdownTemplateEngine: "njk",
     htmlTemplateEngine: "njk",

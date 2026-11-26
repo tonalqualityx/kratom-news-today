@@ -98,7 +98,7 @@ related_briefings:
 
 *Opinion. Mike Dion runs Kratom News Today.*
 
-[Drink Yum](https://drinkyum.com) is a Miami company that makes a flavored kratom extract shot, sold in 30 ml and 14 ml bottles in Bubble Gum and Tropical Breeze. The product is built on a bet about 7-OH. Drink Yum puts mitragynine at the center of the shot, keeps 7-hydroxymitragynine below what its lab can measure, and posts the test results. The DEA's proposed 7-OH ban would judge products by those same two numbers.
+[Drink Yum](https://drinkyum.com) is a Miami company that makes a flavored kratom extract shot, sold in 30 ml and 14 ml bottles in Bubble Gum and Tropical Breeze. The product is built on a bet about 7-OH. Drink Yum puts mitragynine at the center of the shot, aims to keep 7-hydroxymitragynine in every batch below what its lab can measure, and posts results by lot. The DEA's proposed 7-OH ban would judge products by those same two numbers.
 
 Ivan Estrada, who handles Drink Yum's online distribution, talked with me on November 13 for a Q&A that runs separately. His partner Gunther created the product. Ivan said the shots are sold in smoke shops in Nevada, Arizona and California, and that anyone whose state allows it can order from the website.
 

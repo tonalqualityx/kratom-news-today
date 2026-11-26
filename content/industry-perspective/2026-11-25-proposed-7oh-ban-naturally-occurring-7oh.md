@@ -100,7 +100,7 @@ related_briefings:
 
 [Drink Yum](https://drinkyum.com) is a Miami company that makes a flavored kratom extract shot, sold in 30 ml and 14 ml bottles in Bubble Gum and Tropical Breeze. The product is built on a bet about 7-OH. Drink Yum puts mitragynine at the center of the shot, keeps 7-hydroxymitragynine below what its lab can measure, and posts the test results. The DEA's proposed 7-OH ban would judge products by those same two numbers.
 
-Ivan Estrada, who handles Drink Yum's online distribution, talked with me on November 13 for a Q&A that runs separately. His partner Gunther created the product. Ivan said the shots are sold in smoke shops in Nevada, Arizona and California, and the rest goes out through the website.
+Ivan Estrada, who handles Drink Yum's online distribution, talked with me on November 13 for a Q&A that runs separately. His partner Gunther created the product. Ivan said the shots are sold in smoke shops in Nevada, Arizona and California, and that anyone whose state allows it can order from the website.
 
 ## What Drink Yum puts on its lab page
 
@@ -118,7 +118,9 @@ On October 14 the DEA published a notice of intent (91 FR 65370) to temporarily 
 
 ## 7-OH vs mitragynine: Drink Yum's numbers on the test
 
-On Drink Yum's published figures, the shot sits under both lines. The site's two mitragynine numbers put six servings in a 30 ml bottle, about 5 ml each. Even at the label's ceiling of 0.33 mg of 7-OH in 5 ml, the shot would hold about 0.07 mg of 7-OH per milliliter, where the notice draws its line at 1 mg. The ratio works out to 42.5 mg of mitragynine against 0.33 mg of 7-OH, about 129 to 1, and the real ratio is higher because the 7-OH is below that ceiling. The notice's line is 100 to 1.
+On 7-OH alone, Drink Yum's published figures sit under both lines. The site's two mitragynine numbers put six servings in a 30 ml bottle, about 5 ml each. Even at the label's ceiling of 0.33 mg of 7-OH in 5 ml, the shot would hold about 0.07 mg of 7-OH per milliliter, where the notice draws its line at 1 mg. The ratio works out to 42.5 mg of mitragynine against 0.33 mg of 7-OH, about 129 to 1, and the real ratio is higher because the 7-OH is below that ceiling. The notice's line is 100 to 1.
+
+The notice also applies both tests to 7-OH and mitragynine pseudoindoxyl combined, and that is where the published figures stop short. The lab page reports pseudoindoxyl only as below the limit, with no number beside it. For the combined ratio to reach 100 to 1, the two together would have to stay at or under 0.425 mg per serving, and the page doesn't give enough to show that.
 
 Those are the company's numbers from one listed lot, and Kratom News Today has not tested the product. "Below the limit of quantitation" means below what that lab's method can measure, so 0.33 mg is a ceiling set by the method and not a measured amount. That makes the ratio the tighter of the two tests. With a less sensitive method, a result reported only as "below the limit" could fail to show the ratio at all: at a ceiling of 0.43 mg per serving, the same arithmetic lands under 100.
 
@@ -148,7 +150,7 @@ Under 0.33 mg per serving is below New York's 1 mg line. Set against the 42.5 mg
 
 ## What a kratom lab report should show
 
-My own view is short. "Naturally occurring" should retire as a selling point, because under a concentration and ratio test it tells a buyer nothing they can check. A label that gives mitragynine and 7-OH per serving, names the lab and ties the result to the lot in the buyer's hand answers the federal test and the state ones. Drink Yum's page does most of that, including the limit behind its 7-OH result. The step I'd like to see, from Drink Yum and from everyone else, is the full certificate for every lot posted where anyone can read it, instead of sent on request. Ivan said it more plainly: "I think lab reports should be something that's a little bit more common."
+My own view is short. "Naturally occurring" should retire as a selling point, because under a concentration and ratio test it tells a buyer nothing they can check. A label that gives mitragynine, 7-OH and pseudoindoxyl per serving, names the lab and ties the result to the lot in the buyer's hand answers the federal test and the state ones. Drink Yum's page does most of that, including the limit behind its 7-OH result. The step I'd like to see, from Drink Yum and from everyone else, is the full certificate for every lot posted where anyone can read it, with a number for pseudoindoxyl beside the one for 7-OH, instead of sent on request. Ivan said it more plainly: "I think lab reports should be something that's a little bit more common."
 
 ## Where the 7-OH rule stands today
 

@@ -52,6 +52,8 @@ KLAVIYO_TEMPLATE_ID=$(python3 -c "import json; print(json.load(open('$KLAVIYO_CO
 KNT_STATE_DIR="/home/mike/.config/knt"
 CAMPAIGN_STATE_FILE="$KNT_STATE_DIR/last_campaign_date.txt"
 
+NOTIFY_LINES=()   # today's briefing lines, posted once by notify_daily
+
 # --- Helpers ---
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
 
@@ -68,6 +70,10 @@ slack_notify() {
 
 slack_notify_json() {
   local json_payload="$1"
+  if [ -n "${KNT_SLACK_DRY:-}" ] || [ "${SLACK_NOTICES_DRY_RUN:-}" = "1" ]; then
+    echo "[dry-run] would post to #check-ins: $json_payload"
+    return 0
+  fi
   if [ -n "$SLACK_BOT_TOKEN" ]; then
     curl -s -X POST "https://slack.com/api/chat.postMessage" \
       -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
@@ -330,17 +336,32 @@ PYEOF
   # and never a reason to withhold the notification.
   local rules_warning="${RULES_WARNINGS[$slug]:-}"
 
+  # Sender sort (2026-11-26): one Slack post per day listing all of today's briefings, not one per article.
+  # This function only queues the article's line; notify_daily posts them together.
+  local line
+  line=$(python3 -c "
+import sys
+title, beat, url, warning = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+beat_tag = f' [{beat}]' if beat else ''
+out = f'• <{url}|{title}>{beat_tag}'
+if warning:
+    out += f'\n   ⚠️ *Rules-check warning (advisory, not blocking):* {warning}'
+print(out)
+" "$title" "$beat" "$url" "$rules_warning" 2>/dev/null)
+  NOTIFY_LINES+=("$line")
+}
+
+# Post the one daily Slack message for every briefing queued by notify_for_slug.
+notify_daily() {
+  [ "${#NOTIFY_LINES[@]}" -eq 0 ] && return 0
   local payload
   payload=$(python3 -c "
 import json, sys
-title, beat, url, chan, warning = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
-beat_tag = f' [{beat}]' if beat else ''
-lines = ['📰 *KNT Daily Briefing Published*', '', f'<{url}|{title}>{beat_tag}', '', '1 briefing(s) live.']
-if warning:
-    lines += ['', f'⚠️ *Rules-check warning (advisory, not blocking):* {warning}']
-msg = '\n'.join(lines)
+chan, lines = sys.argv[1], sys.argv[2:]
+n = len(lines)
+msg = '\n'.join(['📰 *KNT Daily Briefing Published*', ''] + lines + ['', f'{n} briefing(s) live.'])
 print(json.dumps({'channel': chan, 'text': msg, 'unfurl_links': False}))
-" "$title" "$beat" "$url" "$SLACK_CHANNEL" "$rules_warning" 2>/dev/null)
+" "$SLACK_CHANNEL" "${NOTIFY_LINES[@]}" 2>/dev/null)
   slack_notify_json "$payload"
 }
 
@@ -874,11 +895,12 @@ done <<< "$PUBLISHED_FILES"
 # THE LIVENESS GATE. Watch the deploy for the pushed commit, retry once on failure,
 # and require every briefing URL to be live before anything goes out.
 if wait_for_deploy_and_verify "$LOCAL_HEAD" "${SLUGS[@]}"; then
-  # Live: announce on Slack (one message per briefing) and send the one daily email.
+  # Live: announce on Slack (one message per day listing every briefing) and send the one daily email.
   for slug in "${SLUGS[@]}"; do
     [ -z "$slug" ] && continue
     notify_for_slug "$slug"
   done
+  notify_daily
   send_klaviyo_campaign "$ARTICLES_JSON"
   log "SUCCESS: published, verified live, and notified."
 else

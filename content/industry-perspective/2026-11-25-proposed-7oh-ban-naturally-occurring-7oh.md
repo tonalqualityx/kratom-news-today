@@ -32,7 +32,9 @@ tags:
   - "opinion"
 entities:
   - "Drug Enforcement Administration"
+  - "Department of Justice"
   - "Department of Health and Human Services"
+  - "American Kratom Association"
   - "Drink Yum"
   - "Ivan Estrada"
   - "Cora Science"
@@ -51,6 +53,10 @@ sources:
     url: "https://www.federalregister.gov/api/v1/documents.json?conditions[term]=hydroxymitragynine&conditions[publication_date][gte]=2026-10-15&order=newest"
     publisher: "Federal Register"
     published: "2026-11-26"
+  - title: "Joint Status Report, American Kratom Association v. U.S. Drug Enforcement Administration, No. 1:26-cv-02997 (D.D.C.)"
+    url: "https://www.painnewsnetwork.org/s/11-13-AKA-filing.pdf"
+    publisher: "U.S. District Court for the District of Columbia, via Pain News Network"
+    published: "2026-11-13"
   - title: "Senate Bill S8925A"
     url: "https://www.nysenate.gov/legislation/bills/2025/S8925/amendment/A"
     publisher: "New York State Senate"
@@ -87,6 +93,7 @@ related_briefings:
   - "hhs-dea-new-7oh-mgpi-threshold-1-mg-per-gram-100-to-1-mitragynine-ratio-withdraw-july-notice-kennedy-christine-blanche-aka-litigation-resolved-federal-register-october-14"
   - "hochul-signs-new-york-law-s8925a-a9156b-banning-sales-concentrated-synthetic-7oh-products-2-percent-total-alkaloids-1-mg-serving-90-days"
   - "7-hope-alliance-files-two-dea-petitions-clarification-proposed-7oh-mgpi-temporary-schedule-i-thresholds-testing-methods-rush-subeck"
+  - "dea-7oh-mgpi-temporary-scheduling-order-not-issued-november-25-doj-joint-status-report-hhs-consultations-stay-december-14-aka-haddow-pain-news-network"
 ---
 
 *Opinion. Mike Dion runs Kratom News Today.*
@@ -145,4 +152,4 @@ My own view is short. "Naturally occurring" should retire as a selling point, be
 
 ## Where the 7-OH rule stands today
 
-The October document is a notice of intent. It said a temporary order would be published on or after November 13. As of November 26 the Federal Register showed no such order, so 7-OH above the threshold isn't federally scheduled yet. The notice set no comment period. Once an order is published, it takes effect that day and lasts two years, with a possible one-year extension.
+The October document is a notice of intent. It said a temporary order would be published on or after November 13. As of November 26 the Federal Register showed no such order, so 7-OH above the threshold isn't federally scheduled yet. In a November 13 status report in the American Kratom Association's lawsuit, Justice Department attorneys wrote that the DEA still intends to publish the order and that the process "has necessitated ongoing consultations with the Department of Health and Human Services," [as KNT reported](/briefings/dea-7oh-mgpi-temporary-scheduling-order-not-issued-november-25-doj-joint-status-report-hhs-consultations-stay-december-14-aka-haddow-pain-news-network/). The notice set no comment period. Once an order is published, it takes effect that day and lasts two years, with a possible one-year extension.

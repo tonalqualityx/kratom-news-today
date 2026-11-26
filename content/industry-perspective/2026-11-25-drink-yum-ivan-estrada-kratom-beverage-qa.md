@@ -45,7 +45,7 @@ sources:
 related_briefings: []
 ---
 
-Ivan Estrada handles online distribution for [Drink Yum](https://drinkyum.com), a Miami company that makes a flavored kratom extract shot. His partner Gunther created the product and started its production. Drink Yum sells 30 ml and 14 ml bottles in two flavors, Bubble Gum and Tropical Breeze. The company's site lists 255 mg of mitragynine per 30 ml bottle and 7-OH below 0.33 mg per serving, under the lab's limit of quantitation, and says every batch is third-party tested. Ivan said the shots are on smoke shop shelves in three western states. The website ships to most of the country, but not to ten states, Vermont among them.
+Ivan Estrada handles online distribution for [Drink Yum](https://drinkyum.com), a Miami company that makes a flavored kratom extract shot. His partner Gunther created the product and started its production. Drink Yum sells 30 ml and 14 ml bottles in two flavors, Bubble Gum and Tropical Breeze. The company's site lists 255 mg of mitragynine per 30 ml bottle and 7-OH below 0.33 mg per serving, under the lab's limit of quantitation, and says every batch is third-party tested. Ivan said the shots are on smoke shop shelves in three western states. The website ships to most of the country, but not to ten states.
 
 We talked by video on November 13. Ivan opened by saying where he stands: "I'm a longtime kratom user. I'm also not a sick fan. I don't think it's for everyone."
 
@@ -111,7 +111,7 @@ From a societal basis, we've normalized all these concepts. People drink coffee 
 
 ## How Ivan would regulate kratom
 
-**You can't buy kratom in Vermont, and I don't even know who to talk to about changing that.**
+**You can't buy kratom in Vermont (where I live), and I don't even know who to talk to about changing that.**
 
 Probably the American Kratom Association. They're pretty up to date on that stuff. The legality of a lot of it is the competing industries. They don't want it out. I'm not sure how conspiratorial that is. I do know that when kratom first got banned in Thailand, in the 1940s or something like that, it was because it was getting in the way of opium taxes. They said, this is competing in our market space, and that was the first legal ban of kratom.
 
@@ -154,11 +154,5 @@ The idea would be to get installed into kava bars and have it as some sort of en
 **Is there anyone in the space you highly respect, or anyone you're nervous about?**
 
 The concentrated 7-OH people, I think we can all look at that objectively and say that's a negative force on everyone. That's not helping anyone. On the other side, there are these cans called Nubrew. This guy is doing a tremendous job at marketing. He wants to normalize, not the daily consumption, but the normal consumption, where you go to have a picnic and bring a couple of Nubrews. He's getting the word out there and getting on big podcasts, and I think that's pretty cool.
-
-**Was there anything you hoped I'd ask?**
-
-I will tell you it was a lot more pleasant of a conversation than I thought. Sometimes people ask you to come on a podcast and you get a little nervous. Maybe you're talking to a person who's against kratom, and all of a sudden you're jumping into a debate. We've had negative experiences reaching out to people. We reached out to an influencer who was promoting total sobriety. It was probably a bad move on our end, and she got our Instagram banned.
-
-If you ever want to do one of these with an anti-kratom person, I'd be down. Let's have a conversation. It's an industry for many people, and it's a community. When there's a kava bar, it brings people together. It's interesting to get people together who want to see an end to that and see what their reasoning is. At minimum, see if they're honest.
 
 *This interview has been edited for length and clarity.*

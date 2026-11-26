@@ -116,11 +116,13 @@ On October 14 the DEA published a notice of intent (91 FR 65370) to temporarily 
 
 [That notice](/briefings/hhs-dea-new-7oh-mgpi-threshold-1-mg-per-gram-100-to-1-mitragynine-ratio-withdraw-july-notice-kennedy-christine-blanche-aka-litigation-resolved-federal-register-october-14/) replaced the July 6 version (91 FR 40917), which the DEA withdrew when it published the new one. The July version had its own test for botanical material. The October notice applies the same two numbers to everything it covers.
 
+Pseudoindoxyl has a second layer. It is already in Schedule I under a temporary order of August 26 that sets no threshold, and the October notice says that order stays in effect until it expires or the new order replaces it. The American Kratom Association sued over whether the August order reaches botanical kratom with trace amounts of pseudoindoxyl, and that case is still open.
+
 ## 7-OH vs mitragynine: Drink Yum's numbers on the test
 
 On 7-OH alone, Drink Yum's published figures sit under both lines. The site's two mitragynine numbers put six servings in a 30 ml bottle, about 5 ml each. Even at the label's ceiling of 0.33 mg of 7-OH in 5 ml, the shot would hold about 0.07 mg of 7-OH per milliliter, where the notice draws its line at 1 mg. The ratio works out to 42.5 mg of mitragynine against 0.33 mg of 7-OH, about 129 to 1, and the real ratio is higher because the 7-OH is below that ceiling. The notice's line is 100 to 1.
 
-The notice also applies both tests to 7-OH and mitragynine pseudoindoxyl combined, and that is where the published figures stop short. The lab page reports pseudoindoxyl only as below the limit, with no number beside it. For the combined ratio to reach 100 to 1, the two together would have to stay at or under 0.425 mg per serving, and the page doesn't give enough to show that.
+The notice also applies both tests to 7-OH and mitragynine pseudoindoxyl combined, and that is where the published figures stop short. The lab page reports pseudoindoxyl only as below the limit, with no number beside it, which means the lab's method found less than it can measure. For the combined ratio to reach 100 to 1, the two together would have to stay at or under 0.425 mg per serving, and the page doesn't give enough to show that.
 
 Those are the company's numbers from one listed lot, and Kratom News Today has not tested the product. "Below the limit of quantitation" means below what that lab's method can measure, so 0.33 mg is a ceiling set by the method and not a measured amount. That makes the ratio the tighter of the two tests. With a less sensitive method, a result reported only as "below the limit" could fail to show the ratio at all: at a ceiling of 0.43 mg per serving, the same arithmetic lands under 100.
 
@@ -140,7 +142,7 @@ Ivan's answer on synthetics came back to testing too:
 
 Ivan didn't object to rules as such. "It's fine to regulate it," he said, "but to just outright ban it and take the most specialized, hyper-concentrated form and attribute it to the whole thing, it's like saying poppy seed bagels are illegal." A company that sells synthetic 7-OH, in his view, is "asking to have a two, three year long business."
 
-The October notice is closer to the regulation he describes than to an outright ban. It reaches products by concentration and ratio, and it doesn't schedule anything below those lines.
+The October notice is closer to the regulation he describes than to an outright ban. It reaches products by concentration and ratio, and it would not schedule 7-OH below those lines.
 
 ## How state 7-OH limits compare
 
@@ -150,7 +152,7 @@ Under 0.33 mg per serving is below New York's 1 mg line. Set against the 42.5 mg
 
 ## What a kratom lab report should show
 
-My own view is short. "Naturally occurring" should retire as a selling point, because under a concentration and ratio test it tells a buyer nothing they can check. A label that gives mitragynine, 7-OH and pseudoindoxyl per serving, names the lab and ties the result to the lot in the buyer's hand answers the federal test and the state ones. Drink Yum's page does most of that, including the limit behind its 7-OH result. The step I'd like to see, from Drink Yum and from everyone else, is the full certificate for every lot posted where anyone can read it, with a number for pseudoindoxyl beside the one for 7-OH, instead of sent on request. Ivan said it more plainly: "I think lab reports should be something that's a little bit more common."
+My own view is short. "Naturally occurring" should retire as a selling point, because under a concentration and ratio test it tells a buyer nothing they can check. A label that gives mitragynine, 7-OH and pseudoindoxyl per serving, states the serving size, names the lab and ties the result to the lot in the buyer's hand covers most of what the federal and state tests ask about. New York and Colorado also measure 7-OH against all the alkaloids in a product, so a total alkaloid figure belongs there too. Drink Yum's page does part of that: it names the lab and the lot, and gives mitragynine and 7-OH per serving with the limit behind the 7-OH result. The step I'd like to see, from Drink Yum and from everyone else, is the full certificate for every lot posted where anyone can read it, with a number for pseudoindoxyl beside the one for 7-OH, instead of sent on request. Ivan said it more plainly: "I think lab reports should be something that's a little bit more common."
 
 ## Where the 7-OH rule stands today
 

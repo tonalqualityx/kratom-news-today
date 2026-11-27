@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# KNT Daily Publish — runs Herald, publishes the briefing, notifies Slack
+# KNT Daily Publish — runs Herald, publishes the briefing, sends the daily email
 # Called by system cron at 8am ET daily
 set -euo pipefail
 
@@ -7,7 +7,6 @@ set -euo pipefail
 REPO_DIR="/home/mike/Documents/kratom-news-today"
 LOG_DIR="/home/mike/.local/log"
 LOG_FILE="$LOG_DIR/knt-herald-$(date +%Y-%m-%d).log"
-SLACK_CHANNEL="C0AEBQ36W05"  # #bast-chat
 SITE_URL="https://kratomnewstoday.com"
 # Research wall-clock. Raised 1200 -> 2400 on 2026-08-27. The old 1200 was set in
 # June when research ran 550-670s; by late August it ran 680-1170s (denoise cap had
@@ -39,9 +38,6 @@ KNT_DRY_RUN="${KNT_DRY_RUN:-}"
 
 mkdir -p "$LOG_DIR"
 
-# Read Slack bot token from Openclaw config at runtime
-SLACK_BOT_TOKEN=$(python3 -c "import json; print(json.load(open('/home/mike/.openclaw/openclaw.json'))['channels']['slack']['botToken'])" 2>/dev/null)
-
 # Read Klaviyo config
 KLAVIYO_CONFIG="/home/mike/.config/knt/klaviyo.json"
 KLAVIYO_API_KEY=$(python3 -c "import json; print(json.load(open('$KLAVIYO_CONFIG'))['privateApiKey'])" 2>/dev/null)
@@ -52,36 +48,12 @@ KLAVIYO_TEMPLATE_ID=$(python3 -c "import json; print(json.load(open('$KLAVIYO_CO
 KNT_STATE_DIR="/home/mike/.config/knt"
 CAMPAIGN_STATE_FILE="$KNT_STATE_DIR/last_campaign_date.txt"
 
-NOTIFY_LINES=()   # today's briefing lines, posted once by notify_daily
-
 # --- Helpers ---
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
 
-slack_notify() {
-  local msg="$1"
-  if [ -n "$SLACK_BOT_TOKEN" ]; then
-    curl -s -X POST "https://slack.com/api/chat.postMessage" \
-      -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
-      -H "Content-Type: application/json" \
-      -d "{\"channel\":\"$SLACK_CHANNEL\",\"text\":$(python3 -c "import json; print(json.dumps('$msg'))")}" \
-      > /dev/null 2>&1 || log "WARN: Slack notification failed"
-  fi
-}
-
-slack_notify_json() {
-  local json_payload="$1"
-  if [ -n "${KNT_SLACK_DRY:-}" ] || [ "${SLACK_NOTICES_DRY_RUN:-}" = "1" ]; then
-    echo "[dry-run] would post to #check-ins: $json_payload"
-    return 0
-  fi
-  if [ -n "$SLACK_BOT_TOKEN" ]; then
-    curl -s -X POST "https://slack.com/api/chat.postMessage" \
-      -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
-      -H "Content-Type: application/json" \
-      -d "$json_payload" \
-      > /dev/null 2>&1 || log "WARN: Slack notification failed"
-  fi
-}
+# No Slack from this job (Mike, 2026-11-27: "Let's drop the slack notifiction altogether for knt").
+# Failure notices go to the log only; every fatal path also logs "ERROR:", which the job watch reads.
+notice() { log "NOTICE: $1"; }
 
 # Send ONE Klaviyo campaign containing every briefing published today.
 # Arg 1 is a JSON array: [{"title": "...", "summary": "...", "url": "..."}, ...]
@@ -294,77 +266,6 @@ PYEOF
   fi
 }
 
-# Send a Slack notification for a single published briefing slug.
-# Reads title / beat straight from the committed file — does NOT depend
-# on Claude's JSON output, so it works even when the publish step was killed.
-# (Email is handled separately: one Klaviyo campaign for all of today's briefings.)
-notify_for_slug() {
-  local slug="$1"
-  local file
-  file=$(ls "$REPO_DIR/content/briefings/"*"$slug"*.md 2>/dev/null | head -1)
-  if [ -z "$file" ]; then
-    log "WARN: could not find briefing file for slug '$slug', skipping notify"
-    return 1
-  fi
-
-  local meta
-  meta=$(python3 - "$file" << 'PYEOF'
-import sys, re, json
-content = open(sys.argv[1]).read()
-def fm(key):
-    m = re.search(r'^%s:\s*"?(.+?)"?\s*$' % key, content, re.MULTILINE)
-    return m.group(1).strip() if m else ''
-title = fm('title')
-beat = ''
-m = re.search(r'^tags:\s*\n((?:\s*-\s*.+\n?)+)', content, re.MULTILINE)
-if m:
-    t = re.search(r'-\s*(.+)', m.group(1))
-    beat = t.group(1).strip() if t else ''
-print(json.dumps({'title': title, 'beat': beat}))
-PYEOF
-)
-  local title beat url
-  title=$(echo "$meta" | python3 -c "import json,sys; print(json.load(sys.stdin)['title'])" 2>/dev/null)
-  beat=$(echo "$meta" | python3 -c "import json,sys; print(json.load(sys.stdin)['beat'])" 2>/dev/null)
-  url="$SITE_URL/briefings/$slug/"
-
-  log "Notifying for: $title"
-
-  # Advisory rules-check warning (Sources section, rules.md:37), if one was
-  # recorded for this slug earlier in the run. Appended to the SAME "published"
-  # message rather than a separate alert -- loud, but never a second interruption
-  # and never a reason to withhold the notification.
-  local rules_warning="${RULES_WARNINGS[$slug]:-}"
-
-  # Sender sort (2026-11-26): one Slack post per day listing all of today's briefings, not one per article.
-  # This function only queues the article's line; notify_daily posts them together.
-  local line
-  line=$(python3 -c "
-import sys
-title, beat, url, warning = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-beat_tag = f' [{beat}]' if beat else ''
-out = f'• <{url}|{title}>{beat_tag}'
-if warning:
-    out += f'\n   ⚠️ *Rules-check warning (advisory, not blocking):* {warning}'
-print(out)
-" "$title" "$beat" "$url" "$rules_warning" 2>/dev/null)
-  NOTIFY_LINES+=("$line")
-}
-
-# Post the one daily Slack message for every briefing queued by notify_for_slug.
-notify_daily() {
-  [ "${#NOTIFY_LINES[@]}" -eq 0 ] && return 0
-  local payload
-  payload=$(python3 -c "
-import json, sys
-chan, lines = sys.argv[1], sys.argv[2:]
-n = len(lines)
-msg = '\n'.join(['📰 *KNT Daily Briefing Published*', ''] + lines + ['', f'{n} briefing(s) live.'])
-print(json.dumps({'channel': chan, 'text': msg, 'unfurl_links': False}))
-" "$SLACK_CHANNEL" "${NOTIFY_LINES[@]}" 2>/dev/null)
-  slack_notify_json "$payload"
-}
-
 # Extract one briefing's email fields (title, summary, url) as a JSON object.
 # Sourced from the committed file — the `summary` frontmatter is the TL;DR and
 # single source of truth (also used for the on-page callout, SEO meta,
@@ -414,7 +315,7 @@ PYEOF
 # ADVISORY ONLY, by design (Mike explicitly deferred fail-closed for this
 # rule): a failing check here NEVER blocks the commit/push/deploy/email that
 # already happened earlier in the run -- it only adds a visible warning to the
-# log and to the per-briefing Slack notification, same as any other post-hoc
+# log, same as any other post-hoc
 # audit.
 #
 # Checks, in order:
@@ -609,7 +510,7 @@ cd "$REPO_DIR"
 log "Pulling latest from origin..."
 git pull --ff-only origin main >> "$LOG_FILE" 2>&1 || {
   log "ERROR: git pull failed"
-  slack_notify "⚠ KNT daily publish failed: git pull error. Check $LOG_FILE"
+  notice "⚠ KNT daily publish failed: git pull error. Check $LOG_FILE"
   exit 1
 }
 
@@ -634,7 +535,7 @@ auth_rc=$?
 set -e
 if [ "$auth_rc" -ne 0 ] || echo "$AUTH_OUT" | grep -qiE "not logged in|please run /login"; then
   log "ERROR: Claude CLI not authenticated (rc=$auth_rc). Output: $AUTH_OUT"
-  slack_notify "⚠ KNT daily publish ABORTED before research: Claude CLI is logged out, so the publish step can't run. Run \`/login\` in a Claude Code session on the host, then re-run scripts/daily-publish.sh. No research spend was used. Log: $LOG_FILE"
+  notice "⚠ KNT daily publish ABORTED before research: Claude CLI is logged out, so the publish step can't run. Run \`/login\` in a Claude Code session on the host, then re-run scripts/daily-publish.sh. No research spend was used. Log: $LOG_FILE"
   exit 1
 fi
 log "Claude CLI auth OK."
@@ -669,7 +570,7 @@ for attempt in $(seq 1 "$RESEARCH_ATTEMPTS"); do
 done
 if [ "$research_rc" -ne 0 ]; then
   log "ERROR: research phase failed (rc=$research_rc) or timed out after ${RESEARCH_ATTEMPTS} attempt(s)."
-  slack_notify "⚠ KNT daily publish FAILED: research phase errored (rc=$research_rc) after ${RESEARCH_ATTEMPTS} attempts. Check $LOG_FILE"
+  notice "⚠ KNT daily publish FAILED: research phase errored (rc=$research_rc) after ${RESEARCH_ATTEMPTS} attempts. Check $LOG_FILE"
   exit 1
 fi
 RSTATUS=$(python3 -c "import json; print(json.load(open('$RESEARCH_FILE')).get('status','?'))" 2>/dev/null || echo "?")
@@ -681,13 +582,13 @@ if [ "$RSTATUS" != "success" ]; then
   log "ERROR: research returned status=$RSTATUS: ${RMSG:-no usable findings}"
   # Prefer the engine's specific, actionable message; fall back to the generic one.
   if [ "$RTYPE" = "perplexity_quota" ]; then
-    slack_notify "⚠ KNT daily publish FAILED: Perplexity API is out of quota/credits — no briefing today. Top up the account at https://www.perplexity.ai/settings/api, then re-run scripts/daily-publish.sh. Log: $LOG_FILE"
+    notice "⚠ KNT daily publish FAILED: Perplexity API is out of quota/credits — no briefing today. Top up the account at https://www.perplexity.ai/settings/api, then re-run scripts/daily-publish.sh. Log: $LOG_FILE"
   elif [ "$RTYPE" = "perplexity_auth" ]; then
-    slack_notify "⚠ KNT daily publish FAILED: Perplexity API key was rejected (authentication). Check or rotate perplexity_api_key in ~/.config/herald/credentials, then re-run scripts/daily-publish.sh. Log: $LOG_FILE"
+    notice "⚠ KNT daily publish FAILED: Perplexity API key was rejected (authentication). Check or rotate perplexity_api_key in ~/.config/herald/credentials, then re-run scripts/daily-publish.sh. Log: $LOG_FILE"
   elif [ -n "$RMSG" ]; then
-    slack_notify "⚠ KNT daily publish FAILED: $RMSG Check $LOG_FILE"
+    notice "⚠ KNT daily publish FAILED: $RMSG Check $LOG_FILE"
   else
-    slack_notify "⚠ KNT daily publish FAILED: research status=$RSTATUS. Check $LOG_FILE"
+    notice "⚠ KNT daily publish FAILED: research status=$RSTATUS. Check $LOG_FILE"
   fi
   exit 1
 fi
@@ -757,7 +658,7 @@ run_publish() {
   elif grep -qiE 'Exceeded USD budget|max-budget' "$ATTEMPT_OUT"; then
     # Budget-cap exit: NOT a real failure on its own — it usually means the run
     # finished its briefing(s) and only then ran over. Flag the reason so the log
-    # and any Slack alert read "budget", distinct from a genuine ERROR. The
+    # and the failure notice read "budget", distinct from a genuine ERROR. The
     # published-files check below remains the real arbiter of success.
     LAST_ATTEMPT_REASON="budget"
   fi
@@ -810,15 +711,15 @@ done
 if [ -z "$PUBLISHED_FILES" ]; then
   if [ "$NO_NEWS" -eq 1 ]; then
     log "NO NEWS: Herald found no verifiable new development in the window. Exiting cleanly."
-    slack_notify "🟢 KNT: no briefing today. Herald triage found no verifiable new development in the 24h window, so it skipped publishing per the no-padding rule. No action needed."
+    notice "🟢 KNT: no briefing today. Herald triage found no verifiable new development in the 24h window, so it skipped publishing per the no-padding rule. No action needed."
     log "=== KNT Daily Publish finished (no-news day) ==="
     exit 0
   fi
   log "ERROR: no briefing published after $MAX_ATTEMPTS attempt(s)."
   # Include the tail of the last attempt's transcript and how it ended so the
-  # failure can be triaged from the Slack alert without opening the log.
+  # failure can be triaged from the notice line without reading the whole log.
   FAIL_TAIL=$(tail -n 15 "$ATTEMPT_OUT" 2>/dev/null | tr '\n' ' ' | tr -s ' ' | cut -c1-500)
-  slack_notify "⚠ KNT daily publish FAILED: no briefing after $MAX_ATTEMPTS attempt(s) (last attempt ended: ${LAST_ATTEMPT_REASON:-clean-no-output}). Last log: ${FAIL_TAIL:-<empty>} — full log: $LOG_FILE"
+  notice "⚠ KNT daily publish FAILED: no briefing after $MAX_ATTEMPTS attempt(s) (last attempt ended: ${LAST_ATTEMPT_REASON:-clean-no-output}). Last log: ${FAIL_TAIL:-<empty>} — full log: $LOG_FILE"
   exit 1
 fi
 
@@ -846,7 +747,7 @@ if [ -z "$REMOTE_MAIN" ]; then
     log "Fallback push succeeded."
   else
     log "WARN: fallback push failed and remote state is unknown; sending the newsletter anyway."
-    slack_notify "⚠ KNT publish: wrapper push failed and remote state was unverifiable — newsletter sent anyway. Confirm briefings are live: $LOG_FILE"
+    notice "⚠ KNT publish: wrapper push failed and remote state was unverifiable — newsletter sent anyway. Confirm briefings are live: $LOG_FILE"
   fi
 elif [ "$REMOTE_MAIN" = "$LOCAL_HEAD" ]; then
   log "origin/main already at HEAD ($LOCAL_HEAD) — the publish agent pushed during the run. No wrapper push needed."
@@ -856,7 +757,7 @@ elif git merge-base --is-ancestor "$REMOTE_MAIN" "$LOCAL_HEAD" 2>/dev/null; then
     log "Push succeeded."
   else
     log "WARN: git push failed though HEAD is ahead of origin — NON-FATAL; the newsletter still sends. Push by hand later."
-    slack_notify "⚠ KNT publish: briefing committed but wrapper PUSH FAILED (HEAD ahead of origin). Newsletter sent anyway; push by hand and check $LOG_FILE"
+    notice "⚠ KNT publish: briefing committed but wrapper PUSH FAILED (HEAD ahead of origin). Newsletter sent anyway; push by hand and check $LOG_FILE"
   fi
 else
   log "origin/main ($REMOTE_MAIN) is ahead of or diverged from HEAD ($LOCAL_HEAD) — not pushing (never force). Proceeding to notification."
@@ -878,7 +779,7 @@ while IFS= read -r f; do
   SLUGS+=("$slug")
 
   # Advisory rules-check (Sources section, rules.md:37). LOUD, never blocking:
-  # logs a clear warning and records it for the Slack notification below, but
+  # logs a clear warning, but
   # the commit/push/deploy/email flow proceeds exactly as it would otherwise.
   sources_check=$(check_body_sources_section "$f")
   if [ "$sources_check" != "pass" ]; then
@@ -895,18 +796,13 @@ done <<< "$PUBLISHED_FILES"
 # THE LIVENESS GATE. Watch the deploy for the pushed commit, retry once on failure,
 # and require every briefing URL to be live before anything goes out.
 if wait_for_deploy_and_verify "$LOCAL_HEAD" "${SLUGS[@]}"; then
-  # Live: announce on Slack (one message per day listing every briefing) and send the one daily email.
-  for slug in "${SLUGS[@]}"; do
-    [ -z "$slug" ] && continue
-    notify_for_slug "$slug"
-  done
-  notify_daily
+  # Live: send the one daily email.
   send_klaviyo_campaign "$ARTICLES_JSON"
-  log "SUCCESS: published, verified live, and notified."
+  log "SUCCESS: published and verified live."
 else
   # Not live after the retry: DO NOT email subscribers. Alert loudly instead.
   log "ERROR: briefing(s) did not go live after deploy + retry — SUPPRESSING the newsletter."
-  slack_notify "⚠ KNT publish: briefing(s) committed but NOT verified live after deploy + one retry. Newsletter was NOT sent (no email to a 404). Check the deploy Action and $LOG_FILE"
+  notice "⚠ KNT publish: briefing(s) committed but NOT verified live after deploy + one retry. Newsletter was NOT sent (no email to a 404). Check the deploy Action and $LOG_FILE"
   log "=== KNT Daily Publish finished (email suppressed — not live) ==="
   exit 1
 fi
